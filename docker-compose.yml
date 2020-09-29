@@ -1,0 +1,13 @@
+version: '3.5'
+services:
+  sa-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eb-app
+    ports:
+      - "8888:8080"
+networks:
+  default:
+    external: true
+    name: eb-net

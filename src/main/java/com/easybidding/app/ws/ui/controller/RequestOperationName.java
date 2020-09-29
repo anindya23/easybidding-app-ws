@@ -1,0 +1,6 @@
+package com.easybidding.app.ws.ui.controller;
+
+public enum RequestOperationName {
+	ACTIVE, CREATE, UPDATE, DELETE, UPDATEPASSWORD, FORGOTPASSWORD, RESETPASSWORD, LOGOUT, BATCHINSERT, BATCHUPDATE,
+	BATCHDELETE
+}

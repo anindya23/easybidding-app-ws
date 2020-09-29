@@ -64,7 +64,6 @@ out
 overridedb.*
 target
 transaction-logs
-config
 .flattened-pom.xml
 secrets.yml
 .gradletasknamecache

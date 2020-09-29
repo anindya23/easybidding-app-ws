@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.easybidding.app.ws.config.TokenProvider;
 import com.easybidding.app.ws.event.OnPasswordChangeEvent;
+import com.easybidding.app.ws.event.OnRegistrationCompleteEvent;
 import com.easybidding.app.ws.io.entity.AuthToken;
 import com.easybidding.app.ws.io.entity.UserEntity;
 import com.easybidding.app.ws.repository.impl.UserRepository;
@@ -105,16 +106,16 @@ public class AuthController {
 		return response;
 	}
 
-	@PreAuthorize("hasAnyRole('SYS_ADMIN', 'ACC_ADMIN')")
+//	@PreAuthorize("hasAnyRole('SYS_ADMIN', 'ACC_ADMIN')")
 	@PostMapping("/register")
 	public OperationStatusModel createUser(@Valid @RequestBody UserDto request, final HttpServletRequest httpRequest)
 			throws ParseException {
 		OperationStatusModel response = new OperationStatusModel();
 		response.setOperationName(RequestOperationName.CREATE.name());
 
-//		UserEntity registered = userService.register(request);
-//		eventPublisher.publishEvent(
-//				new OnRegistrationCompleteEvent(registered, httpRequest.getLocale(), utils.getAppUrl(httpRequest)));
+		UserEntity registered = userService.register(request);
+		eventPublisher.publishEvent(
+				new OnRegistrationCompleteEvent(registered, httpRequest.getLocale(), utils.getAppUrl(httpRequest)));
 
 		response.setOperationResult(RequestOperationStatus.SUCCESS.name());
 		return response;

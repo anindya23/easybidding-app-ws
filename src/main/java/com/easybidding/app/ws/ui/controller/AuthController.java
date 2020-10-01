@@ -106,7 +106,7 @@ public class AuthController {
 		return response;
 	}
 
-//	@PreAuthorize("hasAnyRole('SYS_ADMIN', 'ACC_ADMIN')")
+	@PreAuthorize("hasAnyRole('SYS_ADMIN', 'ACC_ADMIN')")
 	@PostMapping("/register")
 	public OperationStatusModel createUser(@Valid @RequestBody UserDto request, final HttpServletRequest httpRequest)
 			throws ParseException {

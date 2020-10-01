@@ -16,7 +16,7 @@ import com.easybidding.app.ws.config.AppProperties;
 public class EasyBiddingAppWsApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger(EasyBiddingAppWsApplication.class);
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(EasyBiddingAppWsApplication.class, args);
 		logger.info("Application Started");

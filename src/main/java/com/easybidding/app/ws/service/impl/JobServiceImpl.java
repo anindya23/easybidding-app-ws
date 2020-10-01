@@ -69,7 +69,7 @@ public class JobServiceImpl implements JobService {
 	public JobServiceImpl(ModelMapper mapper) {
 		this.mapper = mapper;
 		this.mapper.addMappings(mapping);
-//		this.mapper.addMappings(dtoMapping);
+		this.mapper.addMappings(dtoMapping);
 	}
 
 	PropertyMap<JobDto, JobEntity> mapping = new PropertyMap<JobDto, JobEntity>() {
@@ -84,14 +84,12 @@ public class JobServiceImpl implements JobService {
 		}
 	};
 
-//	PropertyMap<JobEntity, JobDto> dtoMapping = new PropertyMap<JobEntity, JobDto>() {
-//		protected void configure() {
-//			skip().setDateCreated(null);
-//			skip().setDateLastUpdated(null);
-//			skip().setDateCreated(null, null);
-//			skip().setDateCreated(null, null);
-//		}
-//	};
+	PropertyMap<JobEntity, JobDto> dtoMapping = new PropertyMap<JobEntity, JobDto>() {
+		protected void configure() {
+			skip().setFiles(null);
+			skip().setAccounts(null);
+		}
+	};
 
 	@Override
 	public JobDto getJobById(String jobId) {

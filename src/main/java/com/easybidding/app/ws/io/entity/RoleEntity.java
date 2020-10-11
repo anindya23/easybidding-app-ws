@@ -25,7 +25,7 @@ public class RoleEntity extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = -145077322530745894L;
 
 	public enum Status {
-		Active, Inactive, Deleted,
+		ACTIVE, INACTIVE, DELETED
 	}
 
 	@Column(length = 10)
@@ -42,7 +42,7 @@ public class RoleEntity extends BaseEntity implements Serializable {
 	private AccountEntity account;
 
 	@Enumerated(EnumType.STRING)
-	@Column(columnDefinition = "ENUM('Active', 'Inactive', 'Deleted')")
+	@Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'DELETED')")
 	private Status status;
 
 	@ManyToOne(fetch = FetchType.LAZY)

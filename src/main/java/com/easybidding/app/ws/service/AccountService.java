@@ -15,6 +15,8 @@ public interface AccountService {
 
 	AccountDto getAccountByEmail(String email);
 
+	List<AccountDto> searchAccountByName(String term);
+
 	List<AccountDto> getAllAccounts();
 
 	List<AccountDto> getAllAccountsByStatus(Status status);

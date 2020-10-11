@@ -75,6 +75,16 @@ public class AccountServiceImpl implements AccountService {
 	};
 
 	@Override
+	public List<AccountDto> searchAccountByName(String term) {
+		List<AccountEntity> entities = accountRepository.findByAccountNameContainingIgnoreCase(term);
+
+		if (entities.isEmpty())
+			throw new RuntimeException("No Accounts Found");
+
+		return getDtosFromEntities(entities);
+	}
+
+	@Override
 	public AccountDto getAccountById(String accountId) {
 		AccountEntity entity = accountRepository.getOne(accountId);
 

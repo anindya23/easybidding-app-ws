@@ -24,7 +24,7 @@ public class CountyEntity extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = -8354062411853908679L;
 
 	public enum Status {
-		Active, Inactive, Deleted,
+		ACTIVE, INACTIVE, DELETED
 	}
 
 	@Column(length = 10)
@@ -42,7 +42,7 @@ public class CountyEntity extends BaseEntity implements Serializable {
 	private CountryEntity country;
 
 	@Enumerated(EnumType.STRING)
-	@Column(columnDefinition = "ENUM('Active', 'Inactive', 'Deleted')")
+	@Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'DELETED')")
 	private Status status;
 
 	@ManyToOne(fetch = FetchType.LAZY)

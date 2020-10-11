@@ -24,7 +24,7 @@ public class SystemInitParamEntity extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = 1299383613344446966L;
 
 	public enum Status {
-		Active, Inactive, Deleted,
+		ACTIVE, INACTIVE, DELETED
 	}
 
 	@Column(nullable = false, length = 100)
@@ -37,7 +37,7 @@ public class SystemInitParamEntity extends BaseEntity implements Serializable {
 	private String defaultValue;
 
 	@Enumerated(EnumType.STRING)
-	@Column(columnDefinition = "ENUM('Active', 'Inactive', 'Deleted')")
+	@Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'DELETED')")
 	private Status status;
 
 	@ManyToOne(fetch = FetchType.LAZY)

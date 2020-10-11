@@ -24,7 +24,7 @@ public class CountryEntity extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = -7551435188800154712L;
 
 	public enum Status {
-		Active, Inactive, Deleted,
+		ACTIVE, INACTIVE, DELETED
 	}
 
 	@Column(length = 10)
@@ -34,7 +34,7 @@ public class CountryEntity extends BaseEntity implements Serializable {
 	private String countryName;
 
 	@Enumerated(EnumType.STRING)
-	@Column(columnDefinition = "ENUM('Active', 'Inactive', 'Deleted')")
+	@Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'DELETED')")
 	private Status status;
 
 	@ManyToOne(fetch = FetchType.LAZY)

@@ -21,7 +21,7 @@ public class JobFileEntity extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = 6493387057422438335L;
 
 	public enum Status {
-		Active, Inactive, Deleted,
+		ACTIVE, INACTIVE, DELETED
 	}
 
 	@Column(nullable = false, length = 255)
@@ -35,7 +35,7 @@ public class JobFileEntity extends BaseEntity implements Serializable {
 	private JobEntity job;
 
 	@Enumerated(EnumType.STRING)
-	@Column(columnDefinition = "ENUM('Active', 'Inactive', 'Deleted')")
+	@Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'DELETED')")
 	private Status status;
 
 	@ManyToOne(fetch = FetchType.LAZY)

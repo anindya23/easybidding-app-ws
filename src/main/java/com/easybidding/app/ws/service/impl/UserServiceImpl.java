@@ -234,7 +234,7 @@ public class UserServiceImpl implements UserService {
 			throw new UserAlreadyExistException("There is an account with that email adress: " + dto.getEmail());
 
 		UserEntity entity = convertDtoToEntity(dto, null);
-		entity.setStatus(UserEntity.Status.Inactive);
+		entity.setStatus(UserEntity.Status.INACTIVE);
 
 		UserEntity savedEntity = userRepository.save(entity);
 		return savedEntity;
@@ -299,7 +299,7 @@ public class UserServiceImpl implements UserService {
 		if (entity == null)
 			throw new UsernameNotFoundException("User not found with email: " + email);
 
-		if (entity.getStatus() == UserEntity.Status.Active)
+		if (entity.getStatus() == UserEntity.Status.ACTIVE)
 			enabled = true;
 
 		return new User(entity.getEmail(), entity.getPassword(), enabled, accountNonExpired, credentialsNonExpired,
@@ -317,7 +317,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void activateUser(UserEntity user, HttpServletResponse res) {
-		user.setStatus(Status.Active);
+		user.setStatus(Status.ACTIVE);
 		UserEntity entity = userRepository.save(user);
 
 		authWithoutPassword(entity, res);
@@ -343,7 +343,7 @@ public class UserServiceImpl implements UserService {
 			return TOKEN_EXPIRED;
 		}
 
-		user.setStatus(Status.Active);
+		user.setStatus(Status.ACTIVE);
 		userRepository.save(user);
 		return TOKEN_VALID;
 	}

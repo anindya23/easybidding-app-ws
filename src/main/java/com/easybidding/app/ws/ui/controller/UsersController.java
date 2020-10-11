@@ -8,9 +8,12 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,14 +29,17 @@ import com.easybidding.app.ws.service.UserService;
 import com.easybidding.app.ws.shared.dto.PasswordDto;
 import com.easybidding.app.ws.shared.dto.UserDetailDto;
 import com.easybidding.app.ws.shared.dto.UserDto;
+import com.easybidding.app.ws.shared.dto.UserEmailDto;
 import com.easybidding.app.ws.ui.model.response.OperationStatusModel;
 import com.easybidding.app.ws.ui.model.response.RequestOperationStatus;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/v1/admin/users")
-@PreAuthorize("hasAuthority('SYS_ADMIN')")
 public class UsersController {
 
+	private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
+	
 	@Autowired
 	UserService userService;
 
@@ -82,6 +88,15 @@ public class UsersController {
 		size = size == null ? 3 : size;
 
 		return userService.getUsersByAccountAndStatus(accountId, status, page, size);
+	}
+
+	@PostMapping("/user/email/search")
+	public String checkEmailAvailability(@Valid @RequestBody UserDetailDto request) {
+		UserEntity user = userRepository.findByEmail(request.getEmail());
+		if (user != null && user.getId() != null)
+			return "false";
+		else
+			return "true";
 	}
 
 	@PutMapping("/user")

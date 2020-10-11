@@ -32,7 +32,7 @@ public class JobEntity extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = 261898390264151141L;
 
 	public enum Status {
-		Posted, InProgress, Completed,
+		POSTED, INPROGRESS, COMPLETED
 	}
 
 	@Column(nullable = false, length = 255)
@@ -57,7 +57,7 @@ public class JobEntity extends BaseEntity implements Serializable {
 	private CountryEntity country;
 
 	@Enumerated(EnumType.STRING)
-	@Column(columnDefinition = "ENUM('Posted', 'InProgress', 'Completed')")
+	@Column(columnDefinition = "ENUM('POSTED', 'INPROGRESS', 'COMPLETED')")
 	private Status status;
 
 	@Temporal(TemporalType.TIMESTAMP)

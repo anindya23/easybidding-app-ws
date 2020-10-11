@@ -29,6 +29,8 @@ public interface AccountRepository extends BaseRepository<AccountEntity, String>
 
 	List<AccountEntity> findByCountry(CountryEntity country);
 
+	List<AccountEntity> findByAccountNameContainingIgnoreCase(String term);
+
 	Page<AccountEntity> findByStatus(Status status, Pageable pageable);
 
 	Page<AccountEntity> findByCounty(CountyEntity county, Pageable pageable);

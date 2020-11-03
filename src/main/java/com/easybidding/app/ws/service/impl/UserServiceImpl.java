@@ -44,6 +44,7 @@ import com.easybidding.app.ws.repository.impl.UserRepository;
 import com.easybidding.app.ws.repository.impl.VerificationTokenRepository;
 import com.easybidding.app.ws.service.UserService;
 import com.easybidding.app.ws.shared.Utils;
+import com.easybidding.app.ws.shared.dto.AccountDto;
 import com.easybidding.app.ws.shared.dto.RoleDto;
 import com.easybidding.app.ws.shared.dto.UserDto;
 
@@ -53,6 +54,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Service(value = "userService")
 public class UserServiceImpl implements UserService {
 
+//	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	
 	@Autowired
 	UserRepository userRepository;
 
@@ -109,6 +112,8 @@ public class UserServiceImpl implements UserService {
 
 	PropertyMap<UserEntity, UserDto> dtoMapping = new PropertyMap<UserEntity, UserDto>() {
 		protected void configure() {
+			skip().setAccount(null);
+			skip().setRoles(null);
 			skip().setPassword(null);
 			skip().setDateCreated(null);
 			skip().setDateLastUpdated(null);
@@ -460,10 +465,25 @@ public class UserServiceImpl implements UserService {
 	 */
 	private UserDto convertEntityToDto(UserEntity entity) {
 		UserDto response = this.mapper.map(entity, UserDto.class);
+		
+		if (entity.getAccount() != null)
+			response.setAccount(this.mapper.map(entity.getAccount(), AccountDto.class));
+
+		if (entity.getRoles() != null)
+			response.setRoles(convertRolesToDto(entity.getRoles()));
+
 		response.setDateCreated(entity.getDateCreated(), "Asia/Dhaka");
 		response.setDateLastUpdated(entity.getDateLastUpdated(), "Asia/Dhaka");
 		response.setDateLastActive(entity.getDateLastActive(), "Asia/Dhaka");
 		return response;
+	}
+
+	private Set<RoleDto> convertRolesToDto(Set<RoleEntity> entities) {
+		Set<RoleDto> dtos = new HashSet<RoleDto>();
+		for (RoleEntity entity : entities) {
+			dtos.add(this.mapper.map(entity, RoleDto.class));
+		}
+		return dtos;
 	}
 
 	private List<UserDto> getDtosFromEntities(List<UserEntity> entities) {

@@ -17,15 +17,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.easybidding.app.ws.io.entity.AccountEntity;
 import com.easybidding.app.ws.io.entity.AccountEntity.Status;
 import com.easybidding.app.ws.io.entity.CountryEntity;
 import com.easybidding.app.ws.io.entity.CountyEntity;
 import com.easybidding.app.ws.io.entity.StateEntity;
+import com.easybidding.app.ws.repository.impl.AccountRepository;
 import com.easybidding.app.ws.repository.impl.CountryRepository;
 import com.easybidding.app.ws.repository.impl.CountyRepository;
 import com.easybidding.app.ws.repository.impl.StateRepository;
 import com.easybidding.app.ws.service.AccountService;
 import com.easybidding.app.ws.shared.dto.AccountDto;
+import com.easybidding.app.ws.shared.dto.AccountEmailDto;
 import com.easybidding.app.ws.ui.model.response.OperationStatusModel;
 import com.easybidding.app.ws.ui.model.response.RequestOperationStatus;
 
@@ -36,6 +39,9 @@ public class AccountsController {
 
 	@Autowired
 	AccountService accountService;
+
+	@Autowired
+	AccountRepository accountRepository;
 
 	@Autowired
 	CountryRepository countryRepository;
@@ -159,6 +165,15 @@ public class AccountsController {
 			throw new RuntimeException("No Country Found");
 
 		return accountService.getAccountsByCountry(country, page, size);
+	}
+
+	@PostMapping("/account/email/search")
+	public String checkEmailAvailability(@Valid @RequestBody AccountEmailDto request) {
+		AccountEntity account = accountRepository.findByEmail(request.getEmail());
+		if (account != null && account.getId() != null)
+			return "false";
+		else
+			return "true";
 	}
 
 	@PostMapping("/account")

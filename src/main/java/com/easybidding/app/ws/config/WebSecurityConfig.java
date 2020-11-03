@@ -53,9 +53,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.and()
 				.csrf().disable().authorizeRequests()
 				.antMatchers(
-						"/api/v1/roles",
-						"/api/v1/roles/role",
-						"/api/v1/admin/jobs/account/{accountId}/status/{status}",
 						SecurityConstant.SIGN_UP_URL, 
 						SecurityConstant.RESET_PASSWORD_URL,
 						SecurityConstant.LOGIN_URL, 

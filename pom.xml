@@ -27,6 +27,7 @@
 		<swagger.version>2.8.0</swagger.version>
 		<swagger.ui.version>2.8.0</swagger.ui.version>
 		<datasource-proxy.version>1.7</datasource-proxy.version>
+		<aws.sdk.version>1.11.882</aws.sdk.version>
 	</properties>
 
 	<dependencies>
@@ -96,6 +97,13 @@
 			<groupId>net.ttddyy</groupId>
 			<artifactId>datasource-proxy</artifactId>
 			<version>${datasource-proxy.version}</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk</artifactId>
+			<version>${aws.sdk.version}</version>
 		</dependency>
 
 		<!-- Password Validation -->

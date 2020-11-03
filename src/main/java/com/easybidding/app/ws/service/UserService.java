@@ -51,4 +51,5 @@ public interface UserService extends UserDetailsService {
 	void batchSave(List<UserDto> dtos);
 
 	void batchDelete(List<String> ids);
+
 }

@@ -9,7 +9,7 @@ import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +20,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.easybidding.app.ws.io.entity.UserEntity;
 import com.easybidding.app.ws.repository.impl.AccountRepository;
 import com.easybidding.app.ws.repository.impl.CountryRepository;
 import com.easybidding.app.ws.repository.impl.CountyRepository;
 import com.easybidding.app.ws.repository.impl.JobRepository;
 import com.easybidding.app.ws.repository.impl.StateRepository;
+import com.easybidding.app.ws.repository.impl.UserRepository;
 import com.easybidding.app.ws.service.JobService;
 import com.easybidding.app.ws.shared.Utils;
 import com.easybidding.app.ws.shared.dto.JobDto;
@@ -42,6 +44,9 @@ public class JobController {
 
 	@Autowired
 	JobRepository jobRepository;
+
+	@Autowired
+	UserRepository userRepository;
 
 	@Autowired
 	CountryRepository countryRepository;
@@ -74,6 +79,12 @@ public class JobController {
 	@GetMapping("/account/{accountId}/status/{status}")
 	public List<JobDto> getAllJobsByAccountAndStatus(@PathVariable String accountId, @PathVariable String status) {
 		return jobService.getAllJobsByAccountAndStatus(accountId, status);
+	}
+
+	@GetMapping("/user/{email}/status/{status}")
+	public List<JobDto> getAllJobsByUserAndStatus(@PathVariable String email, @PathVariable String status) {
+		UserEntity user = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+		return jobService.getAllJobsByAccountAndStatus(user.getAccount().getId(), status);
 	}
 
 	@GetMapping("/account/{accountId}/page/{page}/size/{size}")

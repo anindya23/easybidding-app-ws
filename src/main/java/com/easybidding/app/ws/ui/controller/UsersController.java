@@ -11,7 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,7 +29,6 @@ import com.easybidding.app.ws.service.UserService;
 import com.easybidding.app.ws.shared.dto.PasswordDto;
 import com.easybidding.app.ws.shared.dto.UserDetailDto;
 import com.easybidding.app.ws.shared.dto.UserDto;
-import com.easybidding.app.ws.shared.dto.UserEmailDto;
 import com.easybidding.app.ws.ui.model.response.OperationStatusModel;
 import com.easybidding.app.ws.ui.model.response.RequestOperationStatus;
 
@@ -39,7 +38,7 @@ import com.easybidding.app.ws.ui.model.response.RequestOperationStatus;
 public class UsersController {
 
 	private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
-	
+
 	@Autowired
 	UserService userService;
 
@@ -54,7 +53,7 @@ public class UsersController {
 		return userService.getUserById(id);
 	}
 
-	@GetMapping("/user/{email}")
+	@GetMapping("/user/email/{email}")
 	public UserDto getUserByEmail(@PathVariable String email) {
 		return userService.getUserByEmail(email);
 	}
@@ -62,6 +61,12 @@ public class UsersController {
 	@GetMapping("/account/{accountId}")
 	public List<UserDto> getAllUsersByAccount(@PathVariable String accountId) {
 		return userService.getAllUsersByAccount(accountId);
+	}
+	
+	@GetMapping("/user")
+	public List<UserDto> getAllUsersByUser() {
+		UserDto dto = userService.getUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+		return userService.getAllUsersByAccount(dto.getAccount().getId());
 	}
 
 	@GetMapping("/account/{accountId}/status/{status}")
@@ -92,8 +97,9 @@ public class UsersController {
 
 	@PostMapping("/user/email/search")
 	public String checkEmailAvailability(@Valid @RequestBody UserDetailDto request) {
+		logger.info("ID: " + request.getId() + ", Email: " + request.getEmail());
 		UserEntity user = userRepository.findByEmail(request.getEmail());
-		if (user != null && user.getId() != null)
+		if (user != null && !user.getId().equals(request.getId()))
 			return "false";
 		else
 			return "true";

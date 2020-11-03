@@ -62,7 +62,7 @@ public class AuthController {
 	private TokenProvider jwtTokenUtil;
 
 	@PostMapping("/login")
-	public ResponseEntity login(@RequestBody UserLoginRequestModel loginUser) throws AuthenticationException {
+	public ResponseEntity<AuthToken> login(@RequestBody UserLoginRequestModel loginUser) throws AuthenticationException {
 
 		final Authentication authentication = authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(loginUser.getEmail(), loginUser.getPassword()));

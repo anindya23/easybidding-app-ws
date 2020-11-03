@@ -9,7 +9,6 @@ public class JobFileDto {
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private String id;
-	private String fileId;
 	private String fileName;
 	private String filePath;
 	private JobDto job;
@@ -19,20 +18,12 @@ public class JobFileDto {
 	private String dateCreated;
 	private String dateLastUpdated;
 
-	public String getFileId() {
-		return fileId;
-	}
-
 	public String getId() {
 		return id;
 	}
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public void setFileId(String fileId) {
-		this.fileId = fileId;
 	}
 
 	public String getFileName() {

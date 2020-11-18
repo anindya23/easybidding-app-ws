@@ -20,9 +20,12 @@ public interface JobRepository extends BaseRepository<JobEntity, String> {
 	@Query("SELECT j FROM JobEntity j JOIN j.accounts a WHERE a.id = :accountId")
 	public List<JobEntity> findAllJobsByAccount(@Param("accountId") String accountId);
 
-	@Query("SELECT j FROM JobEntity j JOIN j.accounts a WHERE a.id = :accountId AND j.status = :status")
+	@Query("SELECT DISTINCT j FROM JobEntity j JOIN FETCH j.accounts a LEFT JOIN FETCH j.files f WHERE a.id = :accountId AND j.status = :status")
 	public List<JobEntity> findAllJobsByAccountAndStatus(@Param("accountId") String accountId,
 			@Param("status") Status status);
+
+	@Query("SELECT DISTINCT j FROM JobEntity j JOIN FETCH j.accounts a LEFT JOIN FETCH j.files f WHERE j.id = :jobId")
+	public JobEntity findJobById(@Param("jobId") String jobId);
 
 	@Query("SELECT j FROM JobEntity j JOIN j.accounts a WHERE a.id = :accountId")
 	public Page<JobEntity> findJobsByAccount(@Param("accountId") String accountId, Pageable pageable);

@@ -8,6 +8,7 @@ public class AccountDto {
 
 	private String id;
 	private String accountName;
+	private String accountDescription;
 	private String address;
 	private String city;
 	private String district;
@@ -44,6 +45,14 @@ public class AccountDto {
 
 	public void setAccountName(String accountName) {
 		this.accountName = accountName;
+	}
+
+	public String getAccountDescription() {
+		return accountDescription;
+	}
+
+	public void setAccountDescription(String accountDescription) {
+		this.accountDescription = accountDescription;
 	}
 
 	public String getAddress() {

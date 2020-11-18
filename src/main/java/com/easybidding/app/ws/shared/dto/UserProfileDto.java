@@ -4,11 +4,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import com.easybidding.app.ws.validation.ValidEmail;
+
 public class UserProfileDto {
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private String id;
+
+	@ValidEmail
+	private String email;
 	private String firstName;
 	private String lastName;
 	private String address;
@@ -33,6 +38,14 @@ public class UserProfileDto {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public String getFirstName() {

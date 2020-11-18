@@ -5,6 +5,9 @@ import java.util.Date;
 import java.util.Set;
 import java.util.TimeZone;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import com.easybidding.app.ws.validation.ValidEmail;
 
 public class UserDetailDto {
@@ -14,8 +17,12 @@ public class UserDetailDto {
 	private String id;
 
 	@ValidEmail
+	@NotNull
+	@NotEmpty
 	private String email;
 
+	@NotNull
+	@NotEmpty
 	private String firstName;
 	private String lastName;
 	private String address;

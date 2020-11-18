@@ -3,6 +3,7 @@ package com.easybidding.app.ws.io.entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -14,6 +15,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -33,6 +35,9 @@ public class AccountEntity extends BaseEntity implements Serializable {
 
 	@Column(nullable = false, length = 255)
 	private String accountName;
+
+	@Column(columnDefinition = "TEXT")
+	private String accountDescription;
 
 	@Column(columnDefinition = "TEXT")
 	private String address;
@@ -96,6 +101,9 @@ public class AccountEntity extends BaseEntity implements Serializable {
 
 	@ManyToMany(mappedBy = "accounts", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
 	private Set<JobEntity> jobs = new HashSet<JobEntity>();
+	
+	@OneToMany(mappedBy = "account", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
+	private List<JobFileEntity> files;
 
 //	@OneToMany(mappedBy = "account", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, orphanRemoval = true)
 //	private List<AccountRoleEntity> roles = new ArrayList<AccountRoleEntity>();
@@ -112,6 +120,14 @@ public class AccountEntity extends BaseEntity implements Serializable {
 
 	public void setAccountName(String accountName) {
 		this.accountName = accountName;
+	}
+
+	public String getAccountDescription() {
+		return accountDescription;
+	}
+
+	public void setAccountDescription(String accountDescription) {
+		this.accountDescription = accountDescription;
 	}
 
 	public String getAddress() {

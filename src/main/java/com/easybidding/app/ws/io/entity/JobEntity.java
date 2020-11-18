@@ -58,19 +58,28 @@ public class JobEntity extends BaseEntity implements Serializable {
 
 	@Enumerated(EnumType.STRING)
 	@Column(columnDefinition = "ENUM('POSTED', 'INPROGRESS', 'COMPLETED')")
-	private Status status;
+	private Status status = Status.POSTED;
 
-	@Temporal(TemporalType.TIMESTAMP)
+//	@Temporal(TemporalType.TIMESTAMP)
+//	@Column(name = "date_published")
+//	private Date datePublished;
+//
+//	@Temporal(TemporalType.TIMESTAMP)
+//	@Column(name = "bidding_deadline")
+//	private Date biddingDeadline;
+//
+//	@Temporal(TemporalType.TIMESTAMP)
+//	@Column(name = "submission_deadline")
+//	private Date submissionDeadline;
+
 	@Column(name = "date_published")
-	private Date datePublished;
+	private String datePublished;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "bidding_deadline")
-	private Date biddingDeadline;
+	private String biddingDeadline;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "submission_deadline")
-	private Date submissionDeadline;
+	private String submissionDeadline;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "created_by")
@@ -88,11 +97,11 @@ public class JobEntity extends BaseEntity implements Serializable {
 	@Column(name = "date_last_updated")
 	private Date dateLastUpdated = new Date();
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST ,CascadeType.MERGE})
+	@ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST ,CascadeType.MERGE})
 	@JoinTable(name = "eb_account_jobs", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "account_id"))
 	private Set<AccountEntity> accounts = new HashSet<AccountEntity>();
 
-	@OneToMany(mappedBy = "job", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany(mappedBy = "job", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
 	private List<JobFileEntity> files;
 
 	public String getJobTitle() {
@@ -151,27 +160,51 @@ public class JobEntity extends BaseEntity implements Serializable {
 		this.status = status;
 	}
 
-	public Date getDatePublished() {
+//	public Date getDatePublished() {
+//		return datePublished;
+//	}
+//
+//	public void setDatePublished(Date datePublished) {
+//		this.datePublished = datePublished;
+//	}
+//
+//	public Date getBiddingDeadline() {
+//		return biddingDeadline;
+//	}
+//
+//	public void setBiddingDeadline(Date biddingDeadline) {
+//		this.biddingDeadline = biddingDeadline;
+//	}
+//
+//	public Date getSubmissionDeadline() {
+//		return submissionDeadline;
+//	}
+//
+//	public void setSubmissionDeadline(Date submissionDeadline) {
+//		this.submissionDeadline = submissionDeadline;
+//	}
+
+	public String getDatePublished() {
 		return datePublished;
 	}
 
-	public void setDatePublished(Date datePublished) {
+	public void setDatePublished(String datePublished) {
 		this.datePublished = datePublished;
 	}
 
-	public Date getBiddingDeadline() {
+	public String getBiddingDeadline() {
 		return biddingDeadline;
 	}
 
-	public void setBiddingDeadline(Date biddingDeadline) {
+	public void setBiddingDeadline(String biddingDeadline) {
 		this.biddingDeadline = biddingDeadline;
 	}
 
-	public Date getSubmissionDeadline() {
+	public String getSubmissionDeadline() {
 		return submissionDeadline;
 	}
 
-	public void setSubmissionDeadline(Date submissionDeadline) {
+	public void setSubmissionDeadline(String submissionDeadline) {
 		this.submissionDeadline = submissionDeadline;
 	}
 

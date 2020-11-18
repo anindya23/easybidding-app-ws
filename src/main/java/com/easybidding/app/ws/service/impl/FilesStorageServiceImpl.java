@@ -66,11 +66,13 @@ public class FilesStorageServiceImpl implements FilesStorageService {
 	}
 
 	private void uploadFileToS3Bucket(final String bucket, final File file) {
-		final String uniqueFileName = LocalDateTime.now() + "_" + file.getName();
-		
-		LOGGER.info("Uploading file with name= " + uniqueFileName);
+		amazonS3.putObject(new PutObjectRequest(bucket, file.getName(), file));
 
-		amazonS3.putObject(new PutObjectRequest(bucket, uniqueFileName, file));
+//		final String uniqueFileName = LocalDateTime.now() + "_" + file.getName();
+//		
+//		LOGGER.info("Uploading file with name= " + uniqueFileName);
+//
+//		amazonS3.putObject(new PutObjectRequest(bucket, uniqueFileName, file));
 	}
 
 	@Override

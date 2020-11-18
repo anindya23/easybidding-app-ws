@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,8 +28,10 @@ import com.easybidding.app.ws.repository.impl.JobFileRepository;
 import com.easybidding.app.ws.repository.impl.JobRepository;
 import com.easybidding.app.ws.service.FilesStorageService;
 import com.easybidding.app.ws.service.JobFileService;
+import com.easybidding.app.ws.service.JobService;
 import com.easybidding.app.ws.shared.Utils;
 import com.easybidding.app.ws.shared.dto.JobFileDto;
+import com.easybidding.app.ws.shared.dto.JobFilesDto;
 import com.easybidding.app.ws.ui.model.response.OperationStatusModel;
 import com.easybidding.app.ws.ui.model.response.RequestOperationStatus;
 import com.easybidding.app.ws.ui.model.response.ResponseMessage;
@@ -40,6 +43,9 @@ public class JobFileController {
 
 	@Autowired
 	JobFileService jobFileService;
+	
+	@Autowired
+	JobService jobService;
 
 	@Autowired
 	FilesStorageService filesService;
@@ -93,8 +99,6 @@ public class JobFileController {
 //	public JobFileDto addFile(@Valid @RequestBody JobFileDto request) throws ParseException {
 //		return jobFileService.save(request);
 //	}
-
-	
 	
 	@PostMapping
 	public ResponseEntity<ResponseMessage> uploadFiles(@RequestParam("files") MultipartFile[] files) {
@@ -106,6 +110,19 @@ public class JobFileController {
 				fileNames.add(file.getOriginalFilename());
 			});
 			message = "Uploaded the files successfully: " + fileNames;
+			return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
+		} catch (Exception e) {
+			message = "Fail to upload files!";
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
+		}
+	}
+
+	@PostMapping("/upload")
+	public ResponseEntity<ResponseMessage> uploadJobFiles(@ModelAttribute JobFilesDto dto) {
+		String message = "";
+		try {
+			jobService.uploadFiles(dto);
+			message = "Uploaded the files successfully";
 			return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
 		} catch (Exception e) {
 			message = "Fail to upload files!";

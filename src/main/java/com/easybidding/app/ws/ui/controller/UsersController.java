@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,12 +26,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.easybidding.app.ws.event.OnRegistrationCompleteEvent;
 import com.easybidding.app.ws.io.entity.UserEntity;
 import com.easybidding.app.ws.repository.impl.UserRepository;
 import com.easybidding.app.ws.service.UserService;
+import com.easybidding.app.ws.shared.Utils;
 import com.easybidding.app.ws.shared.dto.PasswordDto;
 import com.easybidding.app.ws.shared.dto.UserDetailDto;
 import com.easybidding.app.ws.shared.dto.UserDto;
+import com.easybidding.app.ws.shared.dto.UserEmailDto;
 import com.easybidding.app.ws.ui.model.response.OperationStatusModel;
 import com.easybidding.app.ws.ui.model.response.RequestOperationStatus;
 
@@ -44,6 +50,12 @@ public class UsersController {
 
 	@Autowired
 	UserRepository userRepository;
+
+	@Autowired
+	Utils utils;
+
+	@Autowired
+	ApplicationEventPublisher eventPublisher;
 
 	@Autowired
 	ModelMapper mapper;
@@ -96,13 +108,23 @@ public class UsersController {
 	}
 
 	@PostMapping("/user/email/search")
-	public String checkEmailAvailability(@Valid @RequestBody UserDetailDto request) {
-		logger.info("ID: " + request.getId() + ", Email: " + request.getEmail());
+	public String checkEmailAvailability(@Valid @RequestBody UserEmailDto request) {
+		logger.info("ID: " + request.getUserId() + ", Email: " + request.getEmail());
 		UserEntity user = userRepository.findByEmail(request.getEmail());
-		if (user != null && !user.getId().equals(request.getId()))
+		if (user != null && !user.getId().equals(request.getUserId()))
 			return "false";
 		else
 			return "true";
+	}
+	
+	@PreAuthorize("hasAnyRole('SYS_ADMIN', 'ACC_ADMIN')")
+	@PostMapping("/user")
+	public UserDetailDto createUser(@Valid @RequestBody UserDetailDto request, final HttpServletRequest httpRequest)
+			throws ParseException {
+		UserDto savedDto = userService.save(mapper.map(request, UserDto.class));
+		eventPublisher.publishEvent(
+				new OnRegistrationCompleteEvent(savedDto, httpRequest.getLocale(), utils.getAppUrl(httpRequest)));
+		return mapper.map(savedDto, UserDetailDto.class);
 	}
 
 	@PutMapping("/user")

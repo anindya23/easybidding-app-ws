@@ -2,14 +2,11 @@ package com.easybidding.app.ws.service.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
@@ -17,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,7 +22,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.easybidding.app.ws.config.SecurityConstant;
 import com.easybidding.app.ws.exception.UserAlreadyExistException;
 import com.easybidding.app.ws.io.entity.AccountEntity;
 import com.easybidding.app.ws.io.entity.RoleEntity;
@@ -47,9 +40,6 @@ import com.easybidding.app.ws.shared.Utils;
 import com.easybidding.app.ws.shared.dto.AccountDto;
 import com.easybidding.app.ws.shared.dto.RoleDto;
 import com.easybidding.app.ws.shared.dto.UserDto;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 @Service(value = "userService")
 public class UserServiceImpl implements UserService {
@@ -258,7 +248,8 @@ public class UserServiceImpl implements UserService {
 		}
 
 		UserEntity savedEntity = userRepository.save(convertDtoToEntity(dto, entity));
-		return convertEntityToDto(savedEntity);
+//		return convertEntityToDto(savedEntity);
+		return this.mapper.map(savedEntity, UserDto.class);
 	}
 
 	@Override
@@ -321,16 +312,18 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void activateUser(UserEntity user, HttpServletResponse res) {
+	public void activateUser(UserEntity user) {
+//	public void activateUser(UserEntity user, HttpServletResponse res) {
 		user.setStatus(Status.ACTIVE);
-		UserEntity entity = userRepository.save(user);
+//		UserEntity entity = userRepository.save(user);
+		userRepository.save(user);
 
-		authWithoutPassword(entity, res);
+//		authWithoutPassword(entity, res);
 	}
 
 	@Override
-	public void createVerificationTokenForUser(final UserEntity user, final String token) {
-		final VerificationTokenEntity myToken = new VerificationTokenEntity(token, user);
+	public void createVerificationTokenForUser(final UserDto user, final String token) {
+		final VerificationTokenEntity myToken = new VerificationTokenEntity(token, convertDtoToEntity(user, null));
 		tokenRepository.save(myToken);
 	}
 
@@ -364,30 +357,47 @@ public class UserServiceImpl implements UserService {
 		userRepository.save(user);
 	}
 
-	private void authWithoutPassword(UserEntity user, HttpServletResponse res) {
-		Authentication auth = new UsernamePasswordAuthenticationToken(
-				new User(user.getEmail(), user.getPassword(), getAuthority(user)), null, getAuthority(user));
-		SecurityContextHolder.getContext().setAuthentication(auth);
-
-		String userName = ((User) auth.getPrincipal()).getUsername();
-
-		String token = Jwts.builder().setSubject(userName)
-				.setExpiration(new Date(System.currentTimeMillis() + SecurityConstant.EXPIRATION_TIME))
-				.signWith(SignatureAlgorithm.HS512, SecurityConstant.getTokenSecret()).compact();
-
-		UserEntity userEntity = userRepository.findByEmail(userName);
-
-		res.setContentType("application/json");
-		res.setCharacterEncoding("UTF-8");
-		res.addHeader(SecurityConstant.HEADER_STRING, SecurityConstant.TOKEN_PREFIX + token);
-		res.addHeader("UserId", userEntity.getId());
-		res.addHeader("Name", userEntity.getFirstName() + " " + userEntity.getLastName());
-		res.addHeader("Roles", String.join(",", userEntity.getRoleCodes()));
+	@Override
+	public void changeUsername(UserEntity user, String userName) {
+		user.setEmail(userName);
+		userRepository.save(user);		
 	}
+
+//	private void authWithoutPassword(UserEntity user, HttpServletResponse res) {
+//		Authentication auth = new UsernamePasswordAuthenticationToken(
+//				new User(user.getEmail(), user.getPassword(), getAuthority(user)), null, getAuthority(user));
+//		SecurityContextHolder.getContext().setAuthentication(auth);
+//
+//		String userName = ((User) auth.getPrincipal()).getUsername();
+//
+//		String token = Jwts.builder().setSubject(userName)
+//				.setExpiration(new Date(System.currentTimeMillis() + SecurityConstant.EXPIRATION_TIME))
+//				.signWith(SignatureAlgorithm.HS512, SecurityConstant.getTokenSecret()).compact();
+//
+//		UserEntity userEntity = userRepository.findByEmail(userName);
+//
+//		res.setContentType("application/json");
+//		res.setCharacterEncoding("UTF-8");
+//		res.addHeader(SecurityConstant.HEADER_STRING, SecurityConstant.TOKEN_PREFIX + token);
+//		res.addHeader("UserId", userEntity.getId());
+//		res.addHeader("Name", userEntity.getFirstName() + " " + userEntity.getLastName());
+//		res.addHeader("Roles", String.join(",", userEntity.getRoleCodes()));
+//	}
 
 	private boolean emailExists(String email) {
 		return userRepository.findByEmail(email) != null;
 	}
+
+	@Override
+	public void removeToken(String token) {
+		VerificationTokenEntity entity = tokenRepository.findByToken(token);
+
+		if (entity == null)
+			throw new RuntimeException("No Token found");
+
+		tokenRepository.delete(entity);
+	}
+
 
 	private UserEntity convertDtoToEntity(UserDto dto, UserEntity entity) {
 		if (dto.getId() == null) {
@@ -424,7 +434,7 @@ public class UserServiceImpl implements UserService {
 
 			for (RoleDto role : dto.getRoles()) {
 				if (role.getId() != null) {
-					entities.add(roleRepository.getOne(dto.getAccount().getId()));
+					entities.add(roleRepository.getOne(role.getId()));
 				}
 
 				if (role.getRoleCode() != null && dto.getAccount() != null) {

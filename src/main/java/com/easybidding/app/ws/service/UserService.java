@@ -3,8 +3,6 @@ package com.easybidding.app.ws.service;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import com.easybidding.app.ws.io.entity.UserEntity;
@@ -41,12 +39,17 @@ public interface UserService extends UserDetailsService {
 	UserDto save(UserDto dto);
 
 	void deleteUser(String id);
+	
+	void removeToken(String token);
+
+	void changeUsername(final UserEntity user, final String userName);
 
 	void changeUserPassword(final UserEntity user, final String password);
 
-	void createVerificationTokenForUser(UserEntity user, String token);
+	void createVerificationTokenForUser(UserDto user, String token);
 
-	void activateUser(UserEntity user, final HttpServletResponse res);
+//	void activateUser(UserEntity user, final HttpServletResponse res);
+	void activateUser(UserEntity user);
 
 	void batchSave(List<UserDto> dtos);
 

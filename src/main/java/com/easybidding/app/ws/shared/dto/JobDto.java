@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class JobDto {
 
-	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private String id;
 	private String jobTitle;
@@ -87,48 +87,60 @@ public class JobDto {
 		this.country = country;
 	}
 
-	public Date getDatePublished() {
-		Date d = null;
-		if (datePublished != null) {
-			try {
-				d = format.parse(datePublished);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-		return d;
+//	public Date getDatePublished() {
+//		Date d = null;
+//		if (datePublished != null) {
+//			try {
+//				d = format.parse(datePublished);
+//			} catch (ParseException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		return d;
+//	}
+
+	public String getDatePublished() {
+		return datePublished;
 	}
 
 	public void setDatePublished(String datePublished) {
 		this.datePublished = datePublished;
 	}
 
-	public Date getBiddingDeadline() {
-		Date d = null;
-		if (biddingDeadline != null) {
-			try {
-				d = format.parse(biddingDeadline);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-		return d;
+//	public Date getBiddingDeadline() {
+//		Date d = null;
+//		if (biddingDeadline != null) {
+//			try {
+//				d = format.parse(biddingDeadline);
+//			} catch (ParseException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		return d;
+//	}
+
+	public String getBiddingDeadline() {
+		return biddingDeadline;
 	}
 
 	public void setBiddingDeadline(String biddingDeadline) {
 		this.biddingDeadline = biddingDeadline;
 	}
 
-	public Date getSubmissionDeadline() {
-		Date d = null;
-		if (submissionDeadline != null) {
-			try {
-				d = format.parse(submissionDeadline);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-		return d;
+//	public Date getSubmissionDeadline() {
+//		Date d = null;
+//		if (submissionDeadline != null) {
+//			try {
+//				d = format.parse(submissionDeadline);
+//			} catch (ParseException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		return d;
+//	}
+
+	public String getSubmissionDeadline() {
+		return submissionDeadline;
 	}
 
 	public void setSubmissionDeadline(String submissionDeadline) {

@@ -4,16 +4,16 @@ import java.util.Locale;
 
 import org.springframework.context.ApplicationEvent;
 
-import com.easybidding.app.ws.io.entity.UserEntity;
+import com.easybidding.app.ws.shared.dto.UserDto;
 
 @SuppressWarnings("serial")
 public class OnRegistrationCompleteEvent extends ApplicationEvent {
 
 	private final String appUrl;
 	private final Locale locale;
-	private final UserEntity user;
+	private final UserDto user;
 
-	public OnRegistrationCompleteEvent(final UserEntity user, final Locale locale, final String appUrl) {
+	public OnRegistrationCompleteEvent(final UserDto user, final Locale locale, final String appUrl) {
 		super(user);
 		this.user = user;
 		this.locale = locale;
@@ -28,7 +28,7 @@ public class OnRegistrationCompleteEvent extends ApplicationEvent {
 		return locale;
 	}
 
-	public UserEntity getUser() {
+	public UserDto getUser() {
 		return user;
 	}
 

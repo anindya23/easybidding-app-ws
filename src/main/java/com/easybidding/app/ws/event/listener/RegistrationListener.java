@@ -11,8 +11,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 import com.easybidding.app.ws.event.OnRegistrationCompleteEvent;
-import com.easybidding.app.ws.io.entity.UserEntity;
 import com.easybidding.app.ws.service.UserService;
+import com.easybidding.app.ws.shared.dto.UserDto;
 
 @Component
 public class RegistrationListener implements ApplicationListener<OnRegistrationCompleteEvent> {
@@ -35,15 +35,15 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
 	}
 
 	private void confirmRegistration(final OnRegistrationCompleteEvent event) {
-		final UserEntity user = event.getUser();
+		final UserDto user = event.getUser();
 		final String token = UUID.randomUUID().toString();
 		service.createVerificationTokenForUser(user, token);
 
-		final SimpleMailMessage email = constructEmailMessage(event, user, token);
-		mailSender.send(email);
+//		final SimpleMailMessage email = constructEmailMessage(event, user, token);
+//		mailSender.send(email);
 	}
 
-	private SimpleMailMessage constructEmailMessage(final OnRegistrationCompleteEvent event, final UserEntity user,
+	private SimpleMailMessage constructEmailMessage(final OnRegistrationCompleteEvent event, final UserDto user,
 			final String token) {
 		final String recipientAddress = user.getEmail();
 		final String subject = "Registration Confirmation";

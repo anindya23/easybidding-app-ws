@@ -53,11 +53,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.and()
 				.csrf().disable().authorizeRequests()
 				.antMatchers(
-						SecurityConstant.SIGN_UP_URL, 
-						SecurityConstant.RESET_PASSWORD_URL,
-						SecurityConstant.LOGIN_URL, 
-						SecurityConstant.REG_ACTIVATION_URL + "/{token}",
-						SecurityConstant.FORGOT_PASSWORD_URL + "/{email}"
+//						SecurityConstant.SIGN_UP_URL, 
+//						SecurityConstant.REGISTRATION_CONFIRM + "/{token}",
+						SecurityConstant.LOGIN_URL,
+						SecurityConstant.FORGOT_PASSWORD_URL,
+						SecurityConstant.REG_ACTIVATION_URL,
+						SecurityConstant.RESET_PASSWORD_URL
 				).permitAll()
 				.anyRequest().authenticated()
 			.and()

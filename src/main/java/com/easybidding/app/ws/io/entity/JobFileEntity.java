@@ -27,16 +27,20 @@ public class JobFileEntity extends BaseEntity implements Serializable {
 	@Column(nullable = false, length = 255)
 	private String fileName;
 
-	@Column(nullable = false, length = 255)
+	@Column(length = 255)
 	private String filePath;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "job_id")
 	private JobEntity job;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "account_id")
+	private AccountEntity account;
 
 	@Enumerated(EnumType.STRING)
 	@Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'DELETED')")
-	private Status status;
+	private Status status = Status.ACTIVE;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "created_by")
@@ -76,6 +80,14 @@ public class JobFileEntity extends BaseEntity implements Serializable {
 
 	public void setJob(JobEntity job) {
 		this.job = job;
+	}
+
+	public AccountEntity getAccount() {
+		return account;
+	}
+
+	public void setAccount(AccountEntity account) {
+		this.account = account;
 	}
 
 	public Status getStatus() {

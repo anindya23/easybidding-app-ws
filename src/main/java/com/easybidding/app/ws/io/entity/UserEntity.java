@@ -37,7 +37,7 @@ public class UserEntity extends BaseEntity implements Serializable {
 	@Column(nullable = false, length = 255)
 	private String email;
 
-	@Column(nullable = false, length = 255)
+	@Column(length = 255)
 	private String password;
 
 	@Column(nullable = false, length = 255)
@@ -90,7 +90,7 @@ public class UserEntity extends BaseEntity implements Serializable {
 
 	@Enumerated(EnumType.STRING)
 	@Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'DELETED')")
-	private Status status;
+	private Status status = Status.INACTIVE;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "created_by")

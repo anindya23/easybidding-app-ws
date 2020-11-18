@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -38,6 +40,8 @@ import com.easybidding.app.ws.ui.model.response.RequestOperationStatus;
 @RestController
 @RequestMapping("/api/v1/admin/jobs")
 public class JobController {
+
+	private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
 
 	@Autowired
 	JobService jobService;

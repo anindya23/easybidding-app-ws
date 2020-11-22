@@ -9,4 +9,4 @@
        - name: remove docker images
          shell: docker image rm -f 275838/eb-api
        - name: create docker image
-         shell: docker container run -d --name eb-api -p 8888:8080 275838/eb-api
+         shell: docker container run -d --name eb-api -p 8080:8080 275838/eb-api

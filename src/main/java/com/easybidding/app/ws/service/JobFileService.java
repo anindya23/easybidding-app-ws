@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.easybidding.app.ws.shared.dto.JobFileDto;
+import com.easybidding.app.ws.shared.dto.JobFilesDto;
 
 public interface JobFileService {
 
@@ -28,5 +29,17 @@ public interface JobFileService {
 	void batchSave(List<JobFileDto> dtos);
 
 	void batchDelete(List<String> ids);
+
+	void uploadFiles(JobFilesDto dto);
+
+	byte[] getJobFile(String fileId);
+
+	byte[] getAllFiles(String jobId, String accountId);
+
+//	Resource load(String filename);
+//
+//	void deleteAll();
+//
+//	Stream<Path> loadAll();
 
 }

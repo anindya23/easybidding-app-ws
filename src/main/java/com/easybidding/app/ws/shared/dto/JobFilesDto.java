@@ -4,18 +4,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class JobFilesDto {
 
-	private String accountId;
+	private String[] accounts;
 
 	private String jobId;
 
 	private MultipartFile[] files;
 
-	public String getAccountId() {
-		return accountId;
+	public String[] getAccounts() {
+		return accounts;
 	}
 
-	public void setAccountId(String accountId) {
-		this.accountId = accountId;
+	public void setAccounts(String[] accounts) {
+		this.accounts = accounts;
 	}
 
 	public String getJobId() {

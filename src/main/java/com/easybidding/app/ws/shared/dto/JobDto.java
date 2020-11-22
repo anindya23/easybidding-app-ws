@@ -1,6 +1,5 @@
 package com.easybidding.app.ws.shared.dto;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;

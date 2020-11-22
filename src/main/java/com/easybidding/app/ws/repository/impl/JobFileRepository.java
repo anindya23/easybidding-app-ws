@@ -35,5 +35,8 @@ public interface JobFileRepository extends BaseRepository<JobFileEntity, String>
 
 	@Query("SELECT jf FROM JobFileEntity jf JOIN jf.job j WHERE j.id = :jobId")
 	public Page<JobFileEntity> findFilesByJob(@Param("jobId") String jobId, Pageable pageable);
+	
+	@Query("SELECT jf FROM JobFileEntity jf LEFT JOIN jf.job j LEFT JOIN jf.account a WHERE j.id = :jobId AND a.id = :accountId")
+	List<JobFileEntity> findAllFilesByJobAndAccount(@Param("jobId") String jobId, @Param("accountId") String accountId);
 
 }

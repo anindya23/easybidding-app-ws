@@ -1,45 +1,24 @@
 package com.easybidding.app.ws.service.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.easybidding.app.ws.io.entity.JobEntity;
 import com.easybidding.app.ws.io.entity.JobEntity.Status;
 import com.easybidding.app.ws.io.entity.JobFileEntity;
@@ -54,20 +33,11 @@ import com.easybidding.app.ws.shared.Utils;
 import com.easybidding.app.ws.shared.dto.AccountDto;
 import com.easybidding.app.ws.shared.dto.JobDto;
 import com.easybidding.app.ws.shared.dto.JobFileDto;
-import com.easybidding.app.ws.shared.dto.JobFilesDto;
 
 @Service
 public class JobServiceImpl implements JobService {
 
-	private static final Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
-
-	@Autowired
-	private AmazonS3 amazonS3;
-
-	@Value("${aws.s3.bucket}")
-	private String bucket;
-
-	private final Path root = Paths.get("uploads");
+//	private static final Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
 
 	@Autowired
 	JobRepository jobRepository;
@@ -251,91 +221,6 @@ public class JobServiceImpl implements JobService {
 		jobRepository.deleteByIdIn(ids);
 	}
 
-	@Override
-	@Async
-	public void uploadFiles(JobFilesDto dto) {
-		Set<JobFileEntity> entities = new HashSet<JobFileEntity>();
-
-		try {
-			Arrays.asList(dto.getFiles()).stream().forEach(multipartFile -> {
-				
-				JobFileEntity entity = new JobFileEntity();
-				entity.setId(utils.generateUniqueId(30));
-				entity.setJob(jobRepository.getOne(dto.getJobId()));
-				entity.setAccount(accountRepository.getOne(dto.getAccountId()));
-				
-				final File file = convertMultiPartFileToFile(multipartFile);
-				entity.setFileName(uploadFileToS3Bucket(bucket, dto, file));
-				
-				file.delete();
-				entities.add(entity);
-			});
-			fileRepository.saveInBatch(entities);
-		} catch (final AmazonServiceException ex) {
-			logger.info("File upload is failed.");
-			logger.error("Error= {} while uploading file.", ex.getMessage());
-		}
-	}
-
-	private File convertMultiPartFileToFile(final MultipartFile multipartFile) {
-		final File file = new File(multipartFile.getOriginalFilename());
-		
-		try (final FileOutputStream outputStream = new FileOutputStream(file)) {
-			outputStream.write(multipartFile.getBytes());
-		} catch (final IOException ex) {
-			logger.error("Error converting the multi-part file to file= ", ex.getMessage());
-		}
-		return file;
-	}
-
-	private String uploadFileToS3Bucket(final String bucket, JobFilesDto dto, final File file) {
-		final String uniqueFileName = LocalDateTime.now() + "_" + file.getName();
-		
-		String dir = "jobs/";
-		
-		if (dto.getJobId() != null) {
-			dir = dir + dto.getJobId() + "/";
-		}
-		
-		if (dto.getAccountId() != null) {
-			dir = dir + dto.getAccountId() + "/";
-		}
-		dir = dir + uniqueFileName;
-
-		amazonS3.putObject(new PutObjectRequest(bucket, dir, file));
-		return uniqueFileName;
-	}
-
-	@Override
-	public Resource load(String filename) {
-		try {
-			Path file = root.resolve(filename);
-			Resource resource = new UrlResource(file.toUri());
-
-			if (resource.exists() || resource.isReadable()) {
-				return resource;
-			} else {
-				throw new RuntimeException("Could not read the file!");
-			}
-		} catch (MalformedURLException e) {
-			throw new RuntimeException("Error: " + e.getMessage());
-		}
-	}
-
-	@Override
-	public void deleteAll() {
-		FileSystemUtils.deleteRecursively(root.toFile());
-	}
-
-	@Override
-	public Stream<Path> loadAll() {
-		try {
-			return Files.walk(this.root, 1).filter(path -> !path.equals(this.root)).map(this.root::relativize);
-		} catch (IOException e) {
-			throw new RuntimeException("Could not load the files!");
-		}
-	}
-
 	/*
 	 * Refactoring 1. Conversion shouldn't be here. It's Not Service Layer's
 	 * responsibility. It's the duty of the layer which is going to use Service
@@ -397,13 +282,28 @@ public class JobServiceImpl implements JobService {
 		JobDto response = this.mapper.map(entity, JobDto.class);
 
 		if (entity.getFiles() != null && !entity.getFiles().isEmpty()) {
+			Set<JobFileEntity> entities = new HashSet<JobFileEntity>(entity.getFiles());
 			List<JobFileDto> files = new ArrayList<JobFileDto>();
-			for (JobFileEntity fileEntity : entity.getFiles()) {
+
+			for (JobFileEntity fileEntity : entities) {
 				JobFileDto fileDto = new JobFileDto();
 				fileDto.setId(fileEntity.getId());
 				fileDto.setFileName(fileEntity.getFileName());
 				fileDto.setFilePath(fileEntity.getFilePath());
-
+				
+				if (fileEntity.getJob() != null) {
+					JobDto jobDto = new JobDto();
+					jobDto.setId(fileEntity.getJob().getId());
+					jobDto.setJobTitle(fileEntity.getJob().getJobTitle());
+					fileDto.setJob(jobDto);
+				}
+				
+				if (fileEntity.getAccount() != null) {
+					AccountDto accountDto = new AccountDto();
+					accountDto.setId(fileEntity.getAccount().getId());
+					accountDto.setAccountName(fileEntity.getAccount().getAccountName());
+					fileDto.setAccount(accountDto);
+				}
 				files.add(fileDto);
 			}
 			response.setFiles(files);

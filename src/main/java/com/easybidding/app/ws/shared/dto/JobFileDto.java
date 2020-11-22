@@ -1,22 +1,19 @@
 package com.easybidding.app.ws.shared.dto;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 public class JobFileDto {
-
-	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private String id;
 	private String fileName;
 	private String filePath;
 	private JobDto job;
+	private AccountDto account;
 	private String status;
 	private UserDto createdBy;
 	private UserDto lastUpdatedBy;
-	private String dateCreated;
-	private String dateLastUpdated;
+	private Date dateCreated;
+	private Date dateLastUpdated;
 
 	public String getId() {
 		return id;
@@ -40,6 +37,14 @@ public class JobFileDto {
 
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
+	}
+
+	public AccountDto getAccount() {
+		return account;
+	}
+
+	public void setAccount(AccountDto account) {
+		this.account = account;
 	}
 
 	public JobDto getJob() {
@@ -74,30 +79,20 @@ public class JobFileDto {
 		this.lastUpdatedBy = lastUpdatedBy;
 	}
 
-	public void setDateCreated(String dateCreated) {
-		this.dateCreated = dateCreated;
-	}
-
-	public void setDateLastUpdated(String dateLastUpdated) {
-		this.dateLastUpdated = dateLastUpdated;
-	}
-
-	public String getDateCreated() {
+	public Date getDateCreated() {
 		return dateCreated;
 	}
 
-	public void setDateCreated(Date dateCreated, String timezone) {
-		dateFormat.setTimeZone(TimeZone.getTimeZone(timezone));
-		this.dateCreated = dateFormat.format(dateCreated);
+	public void setDateCreated(Date dateCreated) {
+		this.dateCreated = dateCreated;
 	}
 
-	public String getDateLastUpdated() {
+	public Date getDateLastUpdated() {
 		return dateLastUpdated;
 	}
 
-	public void setDateLastUpdated(Date dateLastUpdated, String timezone) {
-		dateFormat.setTimeZone(TimeZone.getTimeZone(timezone));
-		this.dateLastUpdated = dateFormat.format(dateLastUpdated);
+	public void setDateLastUpdated(Date dateLastUpdated) {
+		this.dateLastUpdated = dateLastUpdated;
 	}
 
 }

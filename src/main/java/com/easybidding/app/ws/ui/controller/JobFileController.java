@@ -2,10 +2,10 @@ package com.easybidding.app.ws.ui.controller;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,28 +94,6 @@ public class JobFileController {
 		return jobFileService.getFilesByJobAndStatus(jobId, status, page, size);
 	}
 
-//	@PostMapping
-//	public JobFileDto addFile(@Valid @RequestBody JobFileDto request) throws ParseException {
-//		return jobFileService.save(request);
-//	}
-
-//	@PostMapping
-//	public ResponseEntity<ResponseMessage> uploadFiles(@RequestParam("files") MultipartFile[] files) {
-//		String message = "";
-//		try {
-//			List<String> fileNames = new ArrayList<>();
-//			Arrays.asList(files).stream().forEach(file -> {
-//				filesService.upload(file);
-//				fileNames.add(file.getOriginalFilename());
-//			});
-//			message = "Uploaded the files successfully: " + fileNames;
-//			return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
-//		} catch (Exception e) {
-//			message = "Fail to upload files!";
-//			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
-//		}
-//	}
-
 	@PostMapping("/upload")
 	public ResponseEntity<ResponseMessage> uploadJobFiles(@ModelAttribute JobFilesDto dto) {
 		String message = "";
@@ -130,54 +108,21 @@ public class JobFileController {
 	}
 
 	@GetMapping(path = "/download/file/{fileId}")
-	public ResponseEntity<ByteArrayResource> uploadFile(@PathVariable("fileId") String fileId) throws IOException {
+	public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable("fileId") String fileId) throws IOException {
 		JobFileDto dto = jobFileService.getFileById(fileId);
 
 		byte[] data = jobFileService.getJobFile(fileId);
 		ByteArrayResource resource = new ByteArrayResource(data);
 
-		return ResponseEntity.ok()
-				.contentLength(data.length)
-				.header("Content-type", "application/octet-stream")
-				.header("Content-disposition", "attachment; filename=\"" + dto.getFileName() + "\"")
-				.body(resource);
+		return ResponseEntity.ok().contentLength(data.length).header("Content-type", "application/octet-stream")
+				.header("Content-disposition", "attachment; filename=\"" + dto.getFileName() + "\"").body(resource);
 	}
 
-	@GetMapping(path = "/download/job/{jobId}/account/{accountId}")
-	public ResponseEntity<ByteArrayResource> uploadFile(@PathVariable("jobId") String jobId,
-			@PathVariable("accountId") String accountId) throws IOException {
-		byte[] data = jobFileService.getAllFiles(jobId, accountId);
-		ByteArrayResource resource = new ByteArrayResource(data);
-
-		String fileName = LocalDateTime.now() + ".zip";
-
-		return ResponseEntity.ok()
-				.contentLength(data.length)
-				.header("Content-type", "application/zip")
-				.header("Content-disposition", "attachment; filename=\"" + fileName + "\"")
-				.body(resource);
+	@GetMapping(path = "/download/job/{jobId}/account/{accountId}", produces = "application/zip")
+	public void downloadFiles(@PathVariable("jobId") String jobId, @PathVariable("accountId") String accountId,
+			HttpServletResponse response) throws IOException {
+		jobFileService.getAllFiles(response, jobId, accountId);
 	}
-
-//	@GetMapping("/files")
-//	public ResponseEntity<List<FileInfo>> getListFiles() {
-//		List<FileInfo> fileInfos = storageService.loadAll().map(path -> {
-//			String filename = path.getFileName().toString();
-//			String url = MvcUriComponentsBuilder
-//					.fromMethodName(FilesController.class, "getFile", path.getFileName().toString()).build().toString();
-//
-//			return new FileInfo(filename, url);
-//		}).collect(Collectors.toList());
-//
-//		return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
-//	}
-
-//	@GetMapping("/files/{filename:.+}")
-//	public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-//		Resource file = storageService.load(filename);
-//		return ResponseEntity.ok()
-//				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
-//				.body(file);
-//	}
 
 	@PutMapping("/file")
 	public JobFileDto updateFile(@Valid @RequestBody JobFileDto request) throws ParseException {
@@ -194,32 +139,5 @@ public class JobFileController {
 		response.setOperationResult(RequestOperationStatus.SUCCESS.name());
 		return response;
 	}
-
-//	@PostMapping
-//	public OperationStatusModel batchSave(@Valid @RequestBody List<JobFileDto> request) throws ParseException {
-//		OperationStatusModel response = new OperationStatusModel();
-//		response.setOperationName(RequestOperationName.BATCHINSERT.name());
-//
-//		jobFileService.batchSave(request);
-//
-//		response.setOperationResult(RequestOperationStatus.SUCCESS.name());
-//		return response;
-//	}
-//
-//	@DeleteMapping
-//	public OperationStatusModel batchDelete(@Valid @RequestBody List<JobFileDto> request) {
-//		OperationStatusModel response = new OperationStatusModel();
-//		response.setOperationName(RequestOperationName.BATCHDELETE.name());
-//
-//		List<String> ids = new ArrayList<String>();
-//
-//		for (JobFileDto req : request) {
-//			ids.add(req.getId());
-//		}
-//		jobFileService.batchDelete(ids);
-//
-//		response.setOperationResult(RequestOperationStatus.SUCCESS.name());
-//		return response;
-//	}
 
 }

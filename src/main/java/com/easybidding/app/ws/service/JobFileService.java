@@ -1,7 +1,10 @@
 package com.easybidding.app.ws.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import com.easybidding.app.ws.shared.dto.JobFileDto;
 import com.easybidding.app.ws.shared.dto.JobFilesDto;
@@ -34,7 +37,7 @@ public interface JobFileService {
 
 	byte[] getJobFile(String fileId);
 
-	byte[] getAllFiles(String jobId, String accountId);
+	void getAllFiles(HttpServletResponse response, String jobId, String accountId) throws IOException;
 
 //	Resource load(String filename);
 //

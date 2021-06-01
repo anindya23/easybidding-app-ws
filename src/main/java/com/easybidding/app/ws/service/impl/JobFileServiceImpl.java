@@ -1,16 +1,27 @@
 package com.easybidding.app.ws.service.impl;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
@@ -264,64 +275,109 @@ public class JobFileServiceImpl implements JobFileService {
 		dir = dir + entity.getFileName();
 		return downloadFile(dir);
 	}
-	
+
 	@Override
-	public byte[] getAllFiles(String jobId, String accountId) {
-		String dir = "jobs/";
+	public void getAllFiles(HttpServletResponse response, String jobId, String accountId) throws IOException {
+		String name = "attachment_" + new Date().getTime() + ".zip";
+		String path = fileToZip(jobId, accountId, name);
 
-		if (jobId != null) {
-			dir = dir + jobId + "/";
+		OutputStream out = null;
+		BufferedInputStream br = null;
+
+		try {
+			String fileName = URLEncoder.encode(name, "UTF-8");
+			br = new BufferedInputStream(new FileInputStream(path));
+			out = response.getOutputStream();
+
+			response.reset();
+			response.setContentType("application/octet-stream");
+			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+
+			int len = 0;
+			byte[] buf = new byte[1024];
+
+			while ((len = br.read(buf)) > 0)
+				out.write(buf, 0, len);
+
+			out.flush();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			br.close();
+			out.close();
 		}
-
-		if (accountId != null) {
-			dir = dir + accountId + "/";
-		}
-
-		byte[] data = null;
-		
-		ObjectListing objects = amazonS3.listObjects(bucket, dir);
-        List<S3ObjectSummary> objectSummaries = objects.getObjectSummaries();
-        
-        for (S3ObjectSummary objectSummary : objectSummaries) {
-            data = downloadFile(objectSummary.getKey());
-        }
-        return data;
 	}
-
-//	@Override
-//	public Resource load(String filename) {
-//		try {
-//			Path file = root.resolve(filename);
-//			Resource resource = new UrlResource(file.toUri());
-//
-//			if (resource.exists() || resource.isReadable()) {
-//				return resource;
-//			} else {
-//				throw new RuntimeException("Could not read the file!");
-//			}
-//		} catch (MalformedURLException e) {
-//			throw new RuntimeException("Error: " + e.getMessage());
-//		}
-//	}
-//
-//	@Override
-//	public void deleteAll() {
-//		FileSystemUtils.deleteRecursively(root.toFile());
-//	}
-//
-//	@Override
-//	public Stream<Path> loadAll() {
-//		try {
-//			return Files.walk(this.root, 1).filter(path -> !path.equals(this.root)).map(this.root::relativize);
-//		} catch (IOException e) {
-//			throw new RuntimeException("Could not load the files!");
-//		}
-//	}
 
 	/*
 	 * ============================== Service Util Methods
 	 * =================================
 	 */
+	private String getS3Dir(String jobId, String accountId) {
+		String s3Dir = "jobs/";
+
+		if (jobId != null) {
+			s3Dir = s3Dir + jobId + "/";
+		}
+
+		if (accountId != null) {
+			s3Dir = s3Dir + accountId + "/";
+		}
+		return s3Dir;
+	}
+
+	private String fileToZip(String jobId, String accountId, String fileName) {
+		BufferedInputStream bis = null;
+		FileOutputStream fos = null;
+		ZipOutputStream zos = null;
+
+		String tempPath = System.getProperty("java.io.tmpdir");
+
+		try {
+			File zipFile = new File(tempPath, fileName);
+			zipFile.deleteOnExit();
+			zipFile.createNewFile();
+
+			fos = new FileOutputStream(zipFile);
+			zos = new ZipOutputStream(new BufferedOutputStream(fos));
+
+			byte[] content = new byte[1024 * 10];
+
+			ObjectListing objects = amazonS3.listObjects(bucket, getS3Dir(jobId, accountId));
+			List<S3ObjectSummary> objectSummaries = objects.getObjectSummaries();
+
+			for (S3ObjectSummary objectSummary : objectSummaries) {
+				S3Object obj = amazonS3.getObject(bucket, objectSummary.getKey());
+				S3ObjectInputStream stream = obj.getObjectContent();
+				bis = new BufferedInputStream(stream);
+
+				ZipEntry zipEntry = new ZipEntry(objectSummary.getKey());
+                zos.putNextEntry(zipEntry);
+                
+				int read = 0;
+				while ((read = bis.read(content, 0, 1024 * 10)) != -1) {
+					zos.write(content, 0, read);
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				if (null != bis)
+					bis.close();
+				if (null != zos)
+					zos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+		}
+		return tempPath + "/" + fileName;
+	}
+
 	private byte[] downloadFile(String dir) {
 		S3Object obj = amazonS3.getObject(bucket, dir);
 		S3ObjectInputStream stream = obj.getObjectContent();

@@ -39,5 +39,8 @@ public interface RoleRepository extends BaseRepository<RoleEntity, String> {
 	@Query("SELECT r FROM RoleEntity r JOIN r.account a WHERE a.id = :accountId AND r.status = :status")
 	public Page<RoleEntity> findRolesByAccountAndStatus(@Param("accountId") String accountId,
 			@Param("status") Status status, Pageable pageable);
+	
+	@Query("SELECT r FROM RoleEntity r JOIN r.account a WHERE a.id IS NULL AND r.roleCode = :roleCode")
+	public RoleEntity findDefaultRoleByRoleCode(@Param("roleCode") String roleCode);
 
 }

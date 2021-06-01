@@ -22,6 +22,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
 @Entity
@@ -103,6 +105,10 @@ public class JobEntity extends BaseEntity implements Serializable {
 
 	@OneToMany(mappedBy = "job", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
 	private List<JobFileEntity> files;
+	
+	@OneToMany(mappedBy = "job", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
+	@Fetch(value = FetchMode.SUBSELECT)
+	private List<JobCustomFieldEntity> fields;
 
 	public String getJobTitle() {
 		return jobTitle;
@@ -266,6 +272,14 @@ public class JobEntity extends BaseEntity implements Serializable {
 		this.files = files;
 	}
 
+	public List<JobCustomFieldEntity> getFields() {
+		return fields;
+	}
+
+	public void setFields(List<JobCustomFieldEntity> fields) {
+		this.fields = fields;
+	}
+	
 	@Override
 	public String toString() {
 		return "Job{" + "Title = '" + jobTitle + '\'' + ", Accounts = '"

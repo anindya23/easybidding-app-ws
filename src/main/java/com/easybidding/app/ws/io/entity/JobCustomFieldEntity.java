@@ -2,48 +2,45 @@ package com.easybidding.app.ws.io.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-@Table(name = "eb_roles")
-public class RoleEntity extends BaseEntity implements Serializable {
+@Table(name = "eb_job_custom_fields")
+public class JobCustomFieldEntity extends BaseEntity implements Serializable {
 
-	private static final long serialVersionUID = -145077322530745894L;
+	private static final long serialVersionUID = 1409122110717765642L;
 
 	public enum Status {
 		ACTIVE, INACTIVE, DELETED
 	}
 
-	@Column(length = 20, unique = true)
-	private String roleCode;
-
 	@Column(nullable = false, length = 255)
-	private String roleName;
+	private String fieldName;
 
-	@Column(columnDefinition = "TEXT")
-	private String roleDescription;
+	@Column(length = 255)
+	private String fieldValue;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "job_id")
+	private JobEntity job;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "account_id")
 	private AccountEntity account;
 
 	@Enumerated(EnumType.STRING)
 	@Column(columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'DELETED')")
-	private Status status;
+	private Status status = Status.ACTIVE;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "created_by")
@@ -61,31 +58,28 @@ public class RoleEntity extends BaseEntity implements Serializable {
 	@Column(name = "date_last_updated")
 	private Date dateLastUpdated = new Date();
 
-	@ManyToMany(mappedBy = "roles", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-	private Set<UserEntity> users = new HashSet<UserEntity>();
-	
-	public String getRoleCode() {
-		return roleCode;
+	public String getFieldName() {
+		return fieldName;
 	}
 
-	public void setRoleCode(String roleCode) {
-		this.roleCode = roleCode;
+	public void setFieldName(String fieldName) {
+		this.fieldName = fieldName;
 	}
 
-	public String getRoleName() {
-		return roleName;
+	public String getFieldValue() {
+		return fieldValue;
 	}
 
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
+	public void setFieldValue(String fieldValue) {
+		this.fieldValue = fieldValue;
 	}
 
-	public String getRoleDescription() {
-		return roleDescription;
+	public JobEntity getJob() {
+		return job;
 	}
 
-	public void setRoleDescription(String roleDescription) {
-		this.roleDescription = roleDescription;
+	public void setJob(JobEntity job) {
+		this.job = job;
 	}
 
 	public AccountEntity getAccount() {
@@ -134,24 +128,6 @@ public class RoleEntity extends BaseEntity implements Serializable {
 
 	public void setDateLastUpdated(Date dateLastUpdated) {
 		this.dateLastUpdated = dateLastUpdated;
-	}
-
-	public void addUser(UserEntity user) {
-		this.users.add(user);
-		user.getRoles().add(this);
-	}
-
-	public void removeUser(UserEntity user) {
-		this.users.remove(user);
-		user.getRoles().remove(this);
-	}
-	
-	public Set<UserEntity> getUsers() {
-		return users;
-	}
-
-	public void setUsers(Set<UserEntity> users) {
-		this.users = users;
 	}
 
 }

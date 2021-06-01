@@ -354,6 +354,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void changeUserPassword(final UserEntity user, final String password) {
 		user.setPassword(passwordEncoder.encode(password));
+		user.setStatus(Status.ACTIVE);
 		userRepository.save(user);
 	}
 
@@ -433,17 +434,21 @@ public class UserServiceImpl implements UserService {
 			Set<RoleEntity> entities = new HashSet<RoleEntity>();
 
 			for (RoleDto role : dto.getRoles()) {
-				if (role.getId() != null) {
-					entities.add(roleRepository.getOne(role.getId()));
-				}
-
-				if (role.getRoleCode() != null && dto.getAccount() != null) {
-					entities.add(roleRepository.findRoleByAccount(entity.getAccount().getId(), role.getRoleCode()));
-				}
-
-				if (role.getRoleCode() != null && dto.getAccount() == null) {
+				if (role.getRoleCode() != null) {
 					entities.add(roleRepository.findByRoleCode(role.getRoleCode()));
 				}
+//				if (role.getId() != null) {
+//					entities.add(roleRepository.getOne(role.getId()));
+//				}
+//
+//				if (role.getRoleCode() != null && dto.getAccount() != null) {
+//					entities.add(roleRepository.findRoleByAccount(entity.getAccount().getId(), role.getRoleCode()));
+//				}
+//
+//				if (role.getRoleCode() != null && dto.getAccount() == null) {
+//					entities.add(roleRepository.findByRoleCode(role.getRoleCode()));
+//				}
+				
 			}
 			entity.setRoles(entities);
 		}

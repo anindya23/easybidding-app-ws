@@ -3,6 +3,7 @@ package com.easybidding.app.ws.ui.controller;
 import java.text.ParseException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -144,27 +147,29 @@ public class AuthController {
 //		return response;
 //	}
 
-//	@GetMapping("/activate/{token}")
-//	public OperationStatusModel activateUser(@PathVariable String token, HttpServletRequest req,
-//			HttpServletResponse res) {
-//		OperationStatusModel response = new OperationStatusModel();
-//		response.setOperationName(RequestOperationName.ACTIVE.name());
-//
-//		String status = userService.validateVerificationToken(token);
-//
-//		if (status.equals("invalidToken"))
-//			throw new RuntimeException("Invalid token: " + token);
-//
-//		if (status.equals("expired"))
-//			throw new RuntimeException("Token Expired: " + token);
-//
-//		UserEntity user = userService.getUserByToken(token);
-////		userService.activateUser(user, res);
-//		userService.activateUser(user);
-//
-//		response.setOperationResult(RequestOperationStatus.SUCCESS.name());
-//		return response;
-//	}
+	@Transactional
+	@GetMapping("/activate/{token}")
+	public OperationStatusModel activateUser(@PathVariable String token, HttpServletRequest req,
+			HttpServletResponse res) {
+		OperationStatusModel response = new OperationStatusModel();
+		response.setOperationName(RequestOperationName.ACTIVE.name());
+
+		String status = userService.validateVerificationToken(token);
+
+		if (status.equals("invalidToken"))
+			throw new RuntimeException("Invalid token: " + token);
+
+		if (status.equals("expired"))
+			throw new RuntimeException("Token Expired: " + token);
+
+		UserEntity user = userService.getUserByToken(token);
+//		userService.activateUser(user, res);
+		userService.activateUser(user);
+		userService.removeToken(token);
+
+		response.setOperationResult(RequestOperationStatus.SUCCESS.name());
+		return response;
+	}
 //
 //	@GetMapping("/user/logout")
 //	public OperationStatusModel logout (final HttpServletRequest req, final HttpServletResponse res) {

@@ -29,6 +29,7 @@ public class JobDto {
 
 	private Set<AccountDto> accounts = new HashSet<AccountDto>();
 	private List<JobFileDto> files;
+	private List<JobCustomFieldDto> fields;
 
 	public String getId() {
 		return id;
@@ -196,13 +197,24 @@ public class JobDto {
 		this.files = files;
 	}
 
+	public List<JobCustomFieldDto> getFields() {
+		return fields;
+	}
+
+	public void setFields(List<JobCustomFieldDto> fields) {
+		this.fields = fields;
+	}
+
 	@Override
 	public String toString() {
 		return "Job{" + "Title = '" + jobTitle + '\'' + ", Accounts = '"
 				+ accounts.stream().map(AccountDto::getId).collect(Collectors.toList()) + '\'' + ", Files = '"
 				+ files.stream().map(JobFileDto::getId).collect(Collectors.toList()) + '\'' + ", Files = '"
 				+ files.stream().map(JobFileDto::getFileName).collect(Collectors.toList()) + '\''
-				+ files.stream().map(JobFileDto::getFilePath).collect(Collectors.toList()) + '\'' + '}';
+				+ files.stream().map(JobFileDto::getFilePath).collect(Collectors.toList()) + '\''
+				+ fields.stream().map(JobCustomFieldDto::getFieldName).collect(Collectors.toList()) + '\'' + ", Files = '"
+				+ fields.stream().map(JobCustomFieldDto::getFieldValue).collect(Collectors.toList()) + '\''
+				+ '}';
 	}
 
 }

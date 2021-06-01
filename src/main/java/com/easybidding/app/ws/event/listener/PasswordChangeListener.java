@@ -39,15 +39,16 @@ public class PasswordChangeListener implements ApplicationListener<OnPasswordCha
 		final String token = UUID.randomUUID().toString();
 		service.createVerificationTokenForUser(user, token);
 
-//		final SimpleMailMessage email = constructEmailMessage(event, user, token);
-//		mailSender.send(email);
+		final SimpleMailMessage email = constructEmailMessage(event, user, token);
+		mailSender.send(email);
 	}
 
 	private SimpleMailMessage constructEmailMessage(final OnPasswordChangeEvent event, final UserDto user,
 			final String token) {
 		final String recipientAddress = user.getEmail();
 		final String subject = "Password Change Confirmation";
-		final String confirmationUrl = event.getAppUrl() + "/resetPassword.html?token=" + token;
+//		final String confirmationUrl = event.getAppUrl() + "/resetPassword.html?token=" + token;
+		final String confirmationUrl = "http://localhost:3000/reset-password.html?token=" + token;
 		final String message = messages.getMessage("message.changePassLink", null,
 				"To reset password, please click on the below link.", event.getLocale());
 		final SimpleMailMessage email = new SimpleMailMessage();

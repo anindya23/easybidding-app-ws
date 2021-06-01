@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.easybidding.app.ws.io.entity.JobCustomFieldEntity;
 import com.easybidding.app.ws.io.entity.JobEntity;
 import com.easybidding.app.ws.io.entity.JobEntity.Status;
 import com.easybidding.app.ws.io.entity.JobFileEntity;
@@ -31,6 +32,7 @@ import com.easybidding.app.ws.repository.impl.StateRepository;
 import com.easybidding.app.ws.service.JobService;
 import com.easybidding.app.ws.shared.Utils;
 import com.easybidding.app.ws.shared.dto.AccountDto;
+import com.easybidding.app.ws.shared.dto.JobCustomFieldDto;
 import com.easybidding.app.ws.shared.dto.JobDto;
 import com.easybidding.app.ws.shared.dto.JobFileDto;
 
@@ -76,6 +78,7 @@ public class JobServiceImpl implements JobService {
 		protected void configure() {
 			skip().setAccounts(null);
 			skip().setFiles(null);
+			skip().setFields(null);
 			skip().setCountry(null);
 			skip().setState(null);
 			skip().setCounty(null);
@@ -87,6 +90,7 @@ public class JobServiceImpl implements JobService {
 	PropertyMap<JobEntity, JobDto> dtoMapping = new PropertyMap<JobEntity, JobDto>() {
 		protected void configure() {
 			skip().setFiles(null);
+			skip().setFields(null);
 //			skip().setAccounts(null);
 		}
 	};
@@ -256,6 +260,33 @@ public class JobServiceImpl implements JobService {
 			entity.setFiles(files);
 		}
 
+		if (dto.getFields() != null && !dto.getFields().isEmpty()) {
+			List<JobCustomFieldEntity> fields = new ArrayList<JobCustomFieldEntity>();
+			for (JobCustomFieldDto fieldDto : dto.getFields()) {
+				if (fieldDto.getId() == null) {
+					fieldDto.setId(utils.generateUniqueId(30));
+				}
+				JobCustomFieldEntity fieldEntity = this.mapper.map(fieldDto, JobCustomFieldEntity.class);
+				fieldEntity.setJob(entity);
+				fields.add(fieldEntity);
+			}
+			if (dto.getId() == null){
+				entity.setFields(fields);
+			}
+			else {
+				entity.getFields().clear();
+				entity.getFields().addAll(fields);				
+			}
+		} else {
+//			if (entity.getFields() != null) {
+//				entity.getFields().clear();
+//			}
+		}
+
+//		if (entity.getFields() != null && dto.getFields() == null && dto.getFields().isEmpty()) {
+//			entity.getFields().clear();
+//		}
+		
 		if (dto.getCountry() != null) {
 			entity.setCountry(countryRepository.findByCountryCode(dto.getCountry().getCountryCode()));
 		}
@@ -308,6 +339,35 @@ public class JobServiceImpl implements JobService {
 			}
 			response.setFiles(files);
 		}
+		
+		if (entity.getFields() != null && !entity.getFields().isEmpty()) {
+			Set<JobCustomFieldEntity> entities = new HashSet<JobCustomFieldEntity>(entity.getFields());
+			List<JobCustomFieldDto> fields = new ArrayList<JobCustomFieldDto>();
+
+			for (JobCustomFieldEntity fieldEntity : entities) {
+				JobCustomFieldDto fieldDto = new JobCustomFieldDto();
+				fieldDto.setId(fieldEntity.getId());
+				fieldDto.setFieldName(fieldEntity.getFieldName());
+				fieldDto.setFieldValue(fieldEntity.getFieldValue());
+				
+				if (fieldEntity.getJob() != null) {
+					JobDto jobDto = new JobDto();
+					jobDto.setId(fieldEntity.getJob().getId());
+					jobDto.setJobTitle(fieldEntity.getJob().getJobTitle());
+					fieldDto.setJob(jobDto);
+				}
+				
+				if (fieldEntity.getAccount() != null) {
+					AccountDto accountDto = new AccountDto();
+					accountDto.setId(fieldEntity.getAccount().getId());
+					accountDto.setAccountName(fieldEntity.getAccount().getAccountName());
+					fieldDto.setAccount(accountDto);
+				}
+				fields.add(fieldDto);
+			}
+			response.setFields(fields);
+		}
+
 		return response;
 	}
 

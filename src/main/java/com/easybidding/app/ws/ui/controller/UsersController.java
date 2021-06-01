@@ -16,6 +16,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -119,6 +120,7 @@ public class UsersController {
 	
 	@PreAuthorize("hasAnyRole('SYS_ADMIN', 'ACC_ADMIN')")
 	@PostMapping("/user")
+	@Transactional
 	public UserDetailDto createUser(@Valid @RequestBody UserDetailDto request, final HttpServletRequest httpRequest)
 			throws ParseException {
 		UserDto savedDto = userService.save(mapper.map(request, UserDto.class));

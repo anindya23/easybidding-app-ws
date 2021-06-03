@@ -2,5 +2,11 @@
     - hosts: webservers
       become: true
       tasks:
+       - name: stop previous version docker
+         shell: docker container stop eb-api
+       - name: remove stopped container
+         shell: docker container rm -f eb-api    
+       - name: remove docker images
+         shell: docker image rm -f 275838/eb-api      
        - name: create docker image
          shell: docker container run -d --name eb-api -p 8080:8080 275838/eb-api

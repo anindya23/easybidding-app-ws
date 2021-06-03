@@ -1,5 +1,5 @@
 ---
-    - hosts: webservers
+    - hosts: apiservers
       become: true
       tasks:
        - name: stop previous version docker

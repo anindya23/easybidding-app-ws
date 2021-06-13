@@ -5,7 +5,6 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -20,9 +19,6 @@ public class EasyBiddingAppWsApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger(EasyBiddingAppWsApplication.class);
 	
-	@Value("${eb.web.server}")
-	private String webServer;
-
 	public static void main(String[] args) {
 		SpringApplication.run(EasyBiddingAppWsApplication.class, args);
 		logger.info("Application Started");
@@ -58,7 +54,7 @@ public class EasyBiddingAppWsApplication {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-					.allowedOrigins(webServer)
+					.allowedOrigins("http://18.219.91.25:8080")
 					.allowedMethods("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS")
 					.allowedHeaders("*");
 			}

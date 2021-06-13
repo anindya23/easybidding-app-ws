@@ -59,7 +59,8 @@ public class EasyBiddingAppWsApplication {
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
 					.allowedOrigins(webServer)
-					.allowedMethods("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS");
+					.allowedMethods("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS")
+					.allowedHeaders("*");
 			}
 		};
 	}

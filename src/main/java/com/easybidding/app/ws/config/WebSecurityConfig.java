@@ -1,8 +1,11 @@
 package com.easybidding.app.ws.config;
 
+import java.util.Arrays;
+
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,11 +18,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+	@Value("${eb.web.server}")
+	private String webServer;
 
 	@Resource(name = "userService")
 	private UserDetailsService userDetailsService;
@@ -46,26 +57,36 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		return new JwtAuthenticationFilter();
 	}
 
+	@Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(webServer));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.headers().frameOptions().disable();
 		http
-			.cors()
-			.and()
-				.csrf().disable().authorizeRequests()
-				.antMatchers(
-//						SecurityConstant.SIGN_UP_URL, 
-//						SecurityConstant.REGISTRATION_CONFIRM + "/{token}",
-						SecurityConstant.LOGIN_URL,
-						SecurityConstant.FORGOT_PASSWORD_URL,
-						SecurityConstant.REG_ACTIVATION_URL,
-						SecurityConstant.RESET_PASSWORD_URL
-				).permitAll()
-				.anyRequest().authenticated()
+			.csrf().disable().authorizeRequests()
+			.antMatchers(
+	//						SecurityConstant.SIGN_UP_URL, 
+	//						SecurityConstant.REGISTRATION_CONFIRM + "/{token}",
+					SecurityConstant.LOGIN_URL,
+					SecurityConstant.FORGOT_PASSWORD_URL,
+					SecurityConstant.REG_ACTIVATION_URL,
+					SecurityConstant.RESET_PASSWORD_URL
+			).permitAll()
+			.anyRequest().authenticated()
 			.and()
 				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
 			.and()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			.and()
+				.cors(withDefaults());
 		http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
 	}
 

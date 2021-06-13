@@ -10,7 +10,6 @@ import javax.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +33,7 @@ import com.easybidding.app.ws.ui.model.response.OperationStatusModel;
 import com.easybidding.app.ws.ui.model.response.RequestOperationStatus;
 
 //@PreAuthorize("hasRole('SYS_ADMIN')")
-@CrossOrigin("*")
+//@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/v1/admin/jobs")
 public class JobController {

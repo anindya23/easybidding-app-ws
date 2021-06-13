@@ -22,8 +22,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -61,7 +59,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(webServer));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -71,22 +69,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.headers().frameOptions().disable();
 		http
-			.csrf().disable().authorizeRequests()
-			.antMatchers(
-	//						SecurityConstant.SIGN_UP_URL, 
-	//						SecurityConstant.REGISTRATION_CONFIRM + "/{token}",
-					SecurityConstant.LOGIN_URL,
-					SecurityConstant.FORGOT_PASSWORD_URL,
-					SecurityConstant.REG_ACTIVATION_URL,
-					SecurityConstant.RESET_PASSWORD_URL
-			).permitAll()
-			.anyRequest().authenticated()
+			.cors()
+			.and()
+				.csrf().disable().authorizeRequests()
+				.antMatchers(
+//						SecurityConstant.SIGN_UP_URL, 
+//						SecurityConstant.REGISTRATION_CONFIRM + "/{token}",
+						SecurityConstant.LOGIN_URL,
+						SecurityConstant.FORGOT_PASSWORD_URL,
+						SecurityConstant.REG_ACTIVATION_URL,
+						SecurityConstant.RESET_PASSWORD_URL
+				).permitAll()
+				.anyRequest().authenticated()
 			.and()
 				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
 			.and()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			.and()
-				.cors(withDefaults());
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
 	}
 

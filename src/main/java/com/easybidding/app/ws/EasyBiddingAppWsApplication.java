@@ -48,17 +48,17 @@ public class EasyBiddingAppWsApplication {
 		return mapper;
 	}
 	
-//	@Bean
-//	public WebMvcConfigurer corsConfigurer() {
-//		return new WebMvcConfigurer() {
-//			@Override
-//			public void addCorsMappings(CorsRegistry registry) {
-//				registry.addMapping("/**")
-//					.allowedOrigins("http://18.219.91.25")
-//					.allowedMethods("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS")
-//					.allowedHeaders("Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "x-requested-with");
-//			}
-//		};
-//	}
+	@Bean
+	public WebMvcConfigurer corsConfigurer() {
+		return new WebMvcConfigurer() {
+			@Override
+			public void addCorsMappings(CorsRegistry registry) {
+				registry.addMapping("/**")
+					.allowedOrigins("http://18.219.91.25")
+					.allowedMethods("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS")
+					.allowedHeaders("*");
+			}
+		};
+	}
 
 }

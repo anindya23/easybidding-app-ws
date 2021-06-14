@@ -1,6 +1,6 @@
 package com.easybidding.app.ws.config;
 
-import java.util.List;
+import java.util.Arrays;
 
 import javax.annotation.Resource;
 
@@ -66,9 +66,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http
 			.cors().configurationSource(request -> {
 				CorsConfiguration cors = new CorsConfiguration();
-				cors.setAllowedOrigins(List.of("http://18.219.91.25:80", "http://18.219.91.25"));
-				cors.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE", "OPTIONS"));
-				cors.setAllowedHeaders(List.of("*"));
+				cors.setAllowedOrigins(Arrays.asList("http://18.219.91.25:80", "http://18.219.91.25"));
+				cors.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS"));
+				cors.setAllowedHeaders(Arrays.asList("*"));
 				return cors;
 		    })
 			.and()

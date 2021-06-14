@@ -54,7 +54,7 @@ public class EasyBiddingAppWsApplication {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-					.allowedOrigins("http://18.219.91.25")
+					.allowedOrigins("*")
 					.allowedMethods("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS")
 					.allowedHeaders("*");
 			}

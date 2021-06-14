@@ -5,6 +5,7 @@ import java.util.Arrays;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +25,9 @@ import org.springframework.web.cors.CorsConfiguration;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+	@Value("${eb.web.server.urls}")
+	private String[] webServers;
+	
 	@Resource(name = "userService")
 	private UserDetailsService userDetailsService;
 
@@ -66,7 +70,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http
 			.cors().configurationSource(request -> {
 				CorsConfiguration cors = new CorsConfiguration();
-				cors.setAllowedOrigins(Arrays.asList("http://18.219.91.25:80", "http://18.219.91.25"));
+//				cors.setAllowedOrigins(Arrays.asList("http://18.219.91.25:80", "http://18.219.91.25"));
+				cors.setAllowedOrigins(Arrays.asList(webServers));
 				cors.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS"));
 				cors.setAllowedHeaders(Arrays.asList("*"));
 				return cors;

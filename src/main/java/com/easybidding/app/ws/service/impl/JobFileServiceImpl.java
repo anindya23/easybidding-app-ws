@@ -3,12 +3,9 @@ package com.easybidding.app.ws.service.impl;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,17 +40,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.IOUtils;
+import com.easybidding.app.ws.io.entity.JobEntity;
 import com.easybidding.app.ws.io.entity.JobFileEntity;
 import com.easybidding.app.ws.io.entity.JobFileEntity.Status;
 import com.easybidding.app.ws.repository.impl.AccountRepository;
 import com.easybidding.app.ws.repository.impl.JobFileRepository;
 import com.easybidding.app.ws.repository.impl.JobRepository;
+import com.easybidding.app.ws.service.FilesStorageService;
 import com.easybidding.app.ws.service.JobFileService;
 import com.easybidding.app.ws.shared.Utils;
 import com.easybidding.app.ws.shared.dto.AccountDto;
@@ -79,6 +81,9 @@ public class JobFileServiceImpl implements JobFileService {
 
 	@Autowired
 	Utils utils;
+	
+	@Autowired
+    FilesStorageService fileStorageService;
 
 	private ModelMapper mapper;
 
@@ -203,15 +208,27 @@ public class JobFileServiceImpl implements JobFileService {
 	@Override
 	@Transactional
 	public void deleteFile(String id) {
-		JobFileEntity job = fileRepository.getOne(id);
+		String key = null;
+		JobFileEntity jobFile = fileRepository.getOne(id);
 
-		if (job == null)
+		if (jobFile == null)
 			throw new RuntimeException("No Files found");
-
-		fileRepository.delete(job);
+		
+		if (jobFile.getAccount().getId() != null) {
+			key = "jobs/" + jobFile.getJob().getId() + "/" + jobFile.getAccount().getId() + "/" + jobFile.getFileName();
+		} else {
+			key = "jobs/" + jobFile.getJob().getId() + "/" + jobFile.getFileName();	
+		}
+		
+		amazonS3.deleteObject(bucket, key);
+		
+		JobEntity job = jobRepository.getOne(jobFile.getJob().getId());
+		job.getFiles().remove(jobFile);
+		jobRepository.save(job);
 	}
 
 	@Override
+	@Transactional
 	public void batchSave(List<JobFileDto> dtos) {
 		Set<JobFileEntity> entities = new HashSet<JobFileEntity>();
 
@@ -233,30 +250,39 @@ public class JobFileServiceImpl implements JobFileService {
 
 	@Override
 	@Async
-	public void uploadFiles(JobFilesDto dto) {
-		Set<JobFileEntity> entities = new HashSet<JobFileEntity>();
+	public List<JobFileDto> uploadFiles(JobFilesDto dto) {
+		List<JobFileEntity> entities = new ArrayList<JobFileEntity>();
 
 		try {
-			Arrays.asList(dto.getAccounts()).stream().forEach(account -> {
-				Arrays.asList(dto.getFiles()).stream().forEach(multipartFile -> {
+			Arrays.asList(dto.getFiles()).stream().forEach(multipartFile -> {
 
+				if (dto.getAccounts() != null) {
+					Arrays.asList(dto.getAccounts()).stream().forEach(account -> {
+						JobFileEntity entity = new JobFileEntity();
+						entity.setId(utils.generateUniqueId(30));
+						entity.setJob(jobRepository.getOne(dto.getJobId()));
+						entity.setAccount(accountRepository.getOne(account));
+						final File file = convertMultiPartFileToFile(multipartFile);
+						entity.setFileName(uploadFileToS3Bucket(bucket, account, dto.getJobId(), file));
+						file.delete();
+						entities.add(entity);
+					});
+				} else {
 					JobFileEntity entity = new JobFileEntity();
 					entity.setId(utils.generateUniqueId(30));
 					entity.setJob(jobRepository.getOne(dto.getJobId()));
-					entity.setAccount(accountRepository.getOne(account));
-
 					final File file = convertMultiPartFileToFile(multipartFile);
-					entity.setFileName(uploadFileToS3Bucket(bucket, account, dto.getJobId(), file));
-
+					entity.setFileName(uploadFileToS3Bucket(bucket, null, dto.getJobId(), file));
 					file.delete();
 					entities.add(entity);
-				});
+				}
 			});
 			fileRepository.saveInBatch(entities);
 		} catch (final AmazonServiceException ex) {
 			logger.info("File upload is failed.");
 			logger.error("Error= {} while uploading file.", ex.getMessage());
 		}
+		return getDtosFromEntities(entities);
 	}
 
 	@Override
@@ -277,35 +303,41 @@ public class JobFileServiceImpl implements JobFileService {
 	}
 
 	@Override
-	public void getAllFiles(HttpServletResponse response, String jobId, String accountId) throws IOException {
+	public ResponseEntity<Resource> getAllFiles(HttpServletResponse response, String jobId, String accountId) throws IOException {
 		String name = "attachment_" + new Date().getTime() + ".zip";
 		String path = fileToZip(jobId, accountId, name);
+		Resource resource = fileStorageService.loadFileAsResource(name);
+		String contentType = "application/octet-stream";
 
-		OutputStream out = null;
-		BufferedInputStream br = null;
-
-		try {
-			String fileName = URLEncoder.encode(name, "UTF-8");
-			br = new BufferedInputStream(new FileInputStream(path));
-			out = response.getOutputStream();
-
-			response.reset();
-			response.setContentType("application/octet-stream");
-			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-
-			int len = 0;
-			byte[] buf = new byte[1024];
-
-			while ((len = br.read(buf)) > 0)
-				out.write(buf, 0, len);
-
-			out.flush();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			br.close();
-			out.close();
-		}
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+//		OutputStream out = null;
+//		BufferedInputStream br = null;
+//
+//		try {
+//			String fileName = URLEncoder.encode(name, "UTF-8");
+//			br = new BufferedInputStream(new FileInputStream(path));
+//			out = response.getOutputStream();
+//
+//			response.reset();
+//			response.setContentType("application/octet-stream");
+//			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+//
+//			int len = 0;
+//			byte[] buf = new byte[1024];
+//
+//			while ((len = br.read(buf)) > 0)
+//				out.write(buf, 0, len);
+//
+//			out.flush();
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//		} finally {
+//			br.close();
+//			out.close();
+//		}
 	}
 
 	/*
@@ -341,11 +373,23 @@ public class JobFileServiceImpl implements JobFileService {
 			zos = new ZipOutputStream(new BufferedOutputStream(fos));
 
 			byte[] content = new byte[1024 * 10];
-
-			ObjectListing objects = amazonS3.listObjects(bucket, getS3Dir(jobId, accountId));
-			List<S3ObjectSummary> objectSummaries = objects.getObjectSummaries();
-
+			
+			String jobDir = getS3Dir(jobId, null);
+			String accountDir = getS3Dir(jobId, accountId);
+			List<S3ObjectSummary> objectSummaries = amazonS3.listObjects(
+					bucket, jobDir).getObjectSummaries();
+			
 			for (S3ObjectSummary objectSummary : objectSummaries) {
+//				System.out.println("S3Dir: " + s3Dir);
+//				System.out.println("Key: " + objectSummary.getKey());
+//				System.out.println("Substring: " + objectSummary.getKey().substring(0, objectSummary.getKey().lastIndexOf("/")));
+//				System.out.println("========================================");
+				
+				String s3Path = objectSummary.getKey().substring(0, objectSummary.getKey().lastIndexOf("/"));
+				
+				if (!jobDir.equals(s3Path + "/") && !accountDir.equals(s3Path + "/"))
+					continue;
+					
 				S3Object obj = amazonS3.getObject(bucket, objectSummary.getKey());
 				S3ObjectInputStream stream = obj.getObjectContent();
 				bis = new BufferedInputStream(stream);
@@ -470,7 +514,7 @@ public class JobFileServiceImpl implements JobFileService {
 		}
 		return response;
 	}
-
+	
 	private List<JobFileDto> getDtosFromEntities(List<JobFileEntity> entities) {
 		List<JobFileDto> dtos = new ArrayList<JobFileDto>();
 

@@ -10,7 +10,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +32,6 @@ import com.easybidding.app.ws.shared.dto.JobFileDto;
 import com.easybidding.app.ws.shared.dto.JobFilesDto;
 import com.easybidding.app.ws.ui.model.response.OperationStatusModel;
 import com.easybidding.app.ws.ui.model.response.RequestOperationStatus;
-import com.easybidding.app.ws.ui.model.response.ResponseMessage;
 
 //@CrossOrigin("*")
 @RestController
@@ -94,16 +93,8 @@ public class JobFileController {
 	}
 
 	@PostMapping("/upload")
-	public ResponseEntity<ResponseMessage> uploadJobFiles(@ModelAttribute JobFilesDto dto) {
-		String message = "";
-		try {
-			jobFileService.uploadFiles(dto);
-			message = "Uploaded the files successfully";
-			return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
-		} catch (Exception e) {
-			message = "Fail to upload files!";
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
-		}
+	public List<JobFileDto> uploadJobFiles(@ModelAttribute JobFilesDto dto) {
+		return jobFileService.uploadFiles(dto);
 	}
 
 	@GetMapping(path = "/download/file/{fileId}")
@@ -118,9 +109,15 @@ public class JobFileController {
 	}
 
 	@GetMapping(path = "/download/job/{jobId}/account/{accountId}", produces = "application/zip")
-	public void downloadFiles(@PathVariable("jobId") String jobId, @PathVariable("accountId") String accountId,
+	public ResponseEntity<Resource> downloadFilesByAccount(@PathVariable("jobId") String jobId, @PathVariable("accountId") String accountId,
 			HttpServletResponse response) throws IOException {
-		jobFileService.getAllFiles(response, jobId, accountId);
+		return jobFileService.getAllFiles(response, jobId, accountId);
+	}
+	
+	@GetMapping(path = "/download/job/{jobId}", produces = "application/zip")
+	public ResponseEntity<Resource> downloadFilesByJob(@PathVariable("jobId") String jobId,
+			HttpServletResponse response) throws IOException {
+		return jobFileService.getAllFiles(response, jobId, null);
 	}
 
 	@PutMapping("/file")

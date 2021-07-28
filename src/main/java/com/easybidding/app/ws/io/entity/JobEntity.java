@@ -43,8 +43,8 @@ public class JobEntity extends BaseEntity implements Serializable {
 	@Column(columnDefinition = "TEXT")
 	private String jobDescription;
 
-	@Column(columnDefinition = "TEXT")
-	private String customNotes;
+//	@Column(columnDefinition = "TEXT")
+//	private String customNotes;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "county_id")
@@ -104,11 +104,16 @@ public class JobEntity extends BaseEntity implements Serializable {
 	private Set<AccountEntity> accounts = new HashSet<AccountEntity>();
 
 	@OneToMany(mappedBy = "job", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
+	@Fetch(value = FetchMode.SUBSELECT) // Otherwise Child (File here) remove is not working. Need to study further. 
 	private List<JobFileEntity> files;
 	
 	@OneToMany(mappedBy = "job", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
 	@Fetch(value = FetchMode.SUBSELECT)
 	private List<JobCustomFieldEntity> fields;
+	
+	@OneToMany(mappedBy = "job", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
+	@Fetch(value = FetchMode.SUBSELECT)
+	private List<JobCustomNoteEntity> customNotes;
 
 	public String getJobTitle() {
 		return jobTitle;
@@ -122,11 +127,19 @@ public class JobEntity extends BaseEntity implements Serializable {
 		return jobDescription;
 	}
 
-	public String getCustomNotes() {
+//	public String getCustomNotes() {
+//		return customNotes;
+//	}
+//
+//	public void setCustomNotes(String customNotes) {
+//		this.customNotes = customNotes;
+//	}
+
+	public List<JobCustomNoteEntity> getCustomNotes() {
 		return customNotes;
 	}
 
-	public void setCustomNotes(String customNotes) {
+	public void setCustomNotes(List<JobCustomNoteEntity> customNotes) {
 		this.customNotes = customNotes;
 	}
 

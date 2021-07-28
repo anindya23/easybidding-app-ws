@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.easybidding.app.ws.io.entity.JobCustomFieldEntity;
+import com.easybidding.app.ws.io.entity.JobCustomNoteEntity;
 import com.easybidding.app.ws.io.entity.JobEntity;
 import com.easybidding.app.ws.io.entity.JobEntity.Status;
 import com.easybidding.app.ws.io.entity.JobFileEntity;
@@ -29,12 +30,15 @@ import com.easybidding.app.ws.repository.impl.CountyRepository;
 import com.easybidding.app.ws.repository.impl.JobFileRepository;
 import com.easybidding.app.ws.repository.impl.JobRepository;
 import com.easybidding.app.ws.repository.impl.StateRepository;
+import com.easybidding.app.ws.service.JobFileService;
 import com.easybidding.app.ws.service.JobService;
 import com.easybidding.app.ws.shared.Utils;
 import com.easybidding.app.ws.shared.dto.AccountDto;
 import com.easybidding.app.ws.shared.dto.JobCustomFieldDto;
+import com.easybidding.app.ws.shared.dto.JobCustomNoteDto;
 import com.easybidding.app.ws.shared.dto.JobDto;
 import com.easybidding.app.ws.shared.dto.JobFileDto;
+import com.easybidding.app.ws.shared.dto.JobFilesDto;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -58,6 +62,9 @@ public class JobServiceImpl implements JobService {
 
 	@Autowired
 	CountyRepository countyRepository;
+	
+	@Autowired
+	JobFileService jobFileService;
 
 	@Autowired
 	Utils utils;
@@ -79,6 +86,7 @@ public class JobServiceImpl implements JobService {
 			skip().setAccounts(null);
 			skip().setFiles(null);
 			skip().setFields(null);
+			skip().setCustomNotes(null);
 			skip().setCountry(null);
 			skip().setState(null);
 			skip().setCounty(null);
@@ -91,13 +99,13 @@ public class JobServiceImpl implements JobService {
 		protected void configure() {
 			skip().setFiles(null);
 			skip().setFields(null);
-//			skip().setAccounts(null);
+			skip().setCustomNotes(null);
+			skip().setUploads(null);
 		}
 	};
 
 	@Override
 	public JobDto getJobById(String jobId) {
-//		JobEntity entity = jobRepository.getOne(jobId);
 		JobEntity entity = jobRepository.findJobById(jobId);
 
 		if (entity == null)
@@ -191,6 +199,14 @@ public class JobServiceImpl implements JobService {
 		}
 
 		JobEntity savedEntity = jobRepository.save(convertDtoToEntity(dto, entity));
+		
+		if (dto.getId() == null && dto.getUploads() != null) {
+			JobFilesDto filesDto = new JobFilesDto();
+			filesDto.setJobId(savedEntity.getId());
+			filesDto.setFiles(dto.getUploads());
+			List<JobFileDto> fileDtos = jobFileService.uploadFiles(filesDto);  
+		}
+
 		return convertEntityToDto(savedEntity);
 	}
 
@@ -252,12 +268,29 @@ public class JobServiceImpl implements JobService {
 				if (fileDto.getId() == null) {
 					fileDto.setId(utils.generateUniqueId(30));
 				}
-//				files.add(this.mapper.map(fileDto, JobFileEntity.class));
 				JobFileEntity fileEntity = this.mapper.map(fileDto, JobFileEntity.class);
 				fileEntity.setJob(entity);
 				files.add(fileEntity);
 			}
 			entity.setFiles(files);
+		}
+
+		if (dto.getCustomNotes() != null && !dto.getCustomNotes().isEmpty()) {
+			List<JobCustomNoteEntity> notes = new ArrayList<JobCustomNoteEntity>();
+			for (JobCustomNoteDto noteDto : dto.getCustomNotes()) {
+				if (noteDto.getId() == null) {
+					noteDto.setId(utils.generateUniqueId(30));
+				}
+				JobCustomNoteEntity noteEntity = this.mapper.map(noteDto, JobCustomNoteEntity.class);
+				notes.add(noteEntity);
+			}
+			if (dto.getId() == null){
+				entity.setCustomNotes(notes);
+			}
+			else {
+				entity.getCustomNotes().clear();
+				entity.getCustomNotes().addAll(notes);				
+			}
 		}
 
 		if (dto.getFields() != null && !dto.getFields().isEmpty()) {
@@ -277,16 +310,8 @@ public class JobServiceImpl implements JobService {
 				entity.getFields().clear();
 				entity.getFields().addAll(fields);				
 			}
-		} else {
-//			if (entity.getFields() != null) {
-//				entity.getFields().clear();
-//			}
 		}
 
-//		if (entity.getFields() != null && dto.getFields() == null && dto.getFields().isEmpty()) {
-//			entity.getFields().clear();
-//		}
-		
 		if (dto.getCountry() != null) {
 			entity.setCountry(countryRepository.findByCountryCode(dto.getCountry().getCountryCode()));
 		}
@@ -338,6 +363,33 @@ public class JobServiceImpl implements JobService {
 				files.add(fileDto);
 			}
 			response.setFiles(files);
+		}
+		
+		if (entity.getCustomNotes() != null && !entity.getCustomNotes().isEmpty()) {
+			Set<JobCustomNoteEntity> entities = new HashSet<JobCustomNoteEntity>(entity.getCustomNotes());
+			List<JobCustomNoteDto> noteDtos = new ArrayList<JobCustomNoteDto>();
+
+			for (JobCustomNoteEntity noteEntity : entities) {
+				JobCustomNoteDto noteDto = new JobCustomNoteDto();
+				noteDto.setId(noteEntity.getId());
+				noteDto.setNote(noteEntity.getNote());
+				
+				if (noteEntity.getJob() != null) {
+					JobDto jobDto = new JobDto();
+					jobDto.setId(noteEntity.getJob().getId());
+					jobDto.setJobTitle(noteEntity.getJob().getJobTitle());
+					noteDto.setJob(jobDto);
+				}
+				
+				if (noteEntity.getAccount() != null) {
+					AccountDto accountDto = new AccountDto();
+					accountDto.setId(noteEntity.getAccount().getId());
+					accountDto.setAccountName(noteEntity.getAccount().getAccountName());
+					noteDto.setAccount(accountDto);
+				}
+				noteDtos.add(noteDto);
+			}
+			response.setCustomNotes(noteDtos);
 		}
 		
 		if (entity.getFields() != null && !entity.getFields().isEmpty()) {

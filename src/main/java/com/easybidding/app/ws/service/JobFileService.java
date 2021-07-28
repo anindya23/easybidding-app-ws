@@ -6,6 +6,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+
 import com.easybidding.app.ws.shared.dto.JobFileDto;
 import com.easybidding.app.ws.shared.dto.JobFilesDto;
 
@@ -33,11 +36,11 @@ public interface JobFileService {
 
 	void batchDelete(List<String> ids);
 
-	void uploadFiles(JobFilesDto dto);
+	List<JobFileDto> uploadFiles(JobFilesDto dto);
 
 	byte[] getJobFile(String fileId);
 
-	void getAllFiles(HttpServletResponse response, String jobId, String accountId) throws IOException;
+	ResponseEntity<Resource> getAllFiles(HttpServletResponse response, String jobId, String accountId) throws IOException;
 
 //	Resource load(String filename);
 //

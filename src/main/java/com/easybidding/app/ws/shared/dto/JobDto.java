@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class JobDto {
 
 	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -14,7 +16,6 @@ public class JobDto {
 	private String id;
 	private String jobTitle;
 	private String jobDescription;
-	private String customNotes;
 	private CountyDto county;
 	private StateDto state;
 	private CountryDto country;
@@ -28,7 +29,9 @@ public class JobDto {
 	private Date dateLastUpdated;
 
 	private Set<AccountDto> accounts = new HashSet<AccountDto>();
+	private MultipartFile[] uploads;
 	private List<JobFileDto> files;
+	private List<JobCustomNoteDto> customNotes;
 	private List<JobCustomFieldDto> fields;
 
 	public String getId() {
@@ -55,11 +58,11 @@ public class JobDto {
 		this.jobDescription = jobDescription;
 	}
 
-	public String getCustomNotes() {
+	public List<JobCustomNoteDto> getCustomNotes() {
 		return customNotes;
 	}
 
-	public void setCustomNotes(String customNotes) {
+	public void setCustomNotes(List<JobCustomNoteDto> customNotes) {
 		this.customNotes = customNotes;
 	}
 
@@ -189,6 +192,14 @@ public class JobDto {
 		this.accounts = accounts;
 	}
 
+	public MultipartFile[] getUploads() {
+		return uploads;
+	}
+
+	public void setUploads(MultipartFile[] uploads) {
+		this.uploads = uploads;
+	}
+
 	public List<JobFileDto> getFiles() {
 		return files;
 	}
@@ -212,9 +223,9 @@ public class JobDto {
 				+ files.stream().map(JobFileDto::getId).collect(Collectors.toList()) + '\'' + ", Files = '"
 				+ files.stream().map(JobFileDto::getFileName).collect(Collectors.toList()) + '\''
 				+ files.stream().map(JobFileDto::getFilePath).collect(Collectors.toList()) + '\''
-				+ fields.stream().map(JobCustomFieldDto::getFieldName).collect(Collectors.toList()) + '\'' + ", Files = '"
-				+ fields.stream().map(JobCustomFieldDto::getFieldValue).collect(Collectors.toList()) + '\''
-				+ '}';
+				+ fields.stream().map(JobCustomFieldDto::getFieldName).collect(Collectors.toList()) + '\''
+				+ ", Files = '" + fields.stream().map(JobCustomFieldDto::getFieldValue).collect(Collectors.toList())
+				+ '\'' + '}';
 	}
 
 }

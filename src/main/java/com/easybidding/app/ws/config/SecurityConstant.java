@@ -12,6 +12,8 @@ public class SecurityConstant {
 	public static final String FORGOT_PASSWORD_URL = "/api/v1/auth/forgot/password";
 	public static final String RESET_PASSWORD_URL = "/api/v1/auth/reset/password";
 	public static final String LOGIN_URL = "/api/v1/auth/login";
+	public static final String DOWNLOAD_JOB_URL = "/api/v1/files/download/job/{jobId}";
+	public static final String DOWNLOAD_ACCOUNT_URL = "/api/v1/files/download/job/{jobId}/account/{accountId}";
 
 	public static String getTokenSecret() {
 		AppProperties appProperties = (AppProperties) EasyBiddingApplicationContext.getBean("appProperties");

@@ -84,7 +84,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 						SecurityConstant.LOGIN_URL,
 						SecurityConstant.FORGOT_PASSWORD_URL,
 						SecurityConstant.REG_ACTIVATION_URL,
-						SecurityConstant.RESET_PASSWORD_URL
+						SecurityConstant.RESET_PASSWORD_URL,
+						SecurityConstant.DOWNLOAD_JOB_URL,
+						SecurityConstant.DOWNLOAD_ACCOUNT_URL
 				).permitAll()
 				.anyRequest().authenticated()
 			.and()

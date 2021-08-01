@@ -19,14 +19,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.easybidding.app.ws.io.entity.AccountEntity;
+import com.easybidding.app.ws.io.entity.JobAccountEntity;
+import com.easybidding.app.ws.io.entity.JobAccountEntity.Status;
 import com.easybidding.app.ws.io.entity.JobCustomFieldEntity;
 import com.easybidding.app.ws.io.entity.JobCustomNoteEntity;
 import com.easybidding.app.ws.io.entity.JobEntity;
-import com.easybidding.app.ws.io.entity.JobEntity.Status;
 import com.easybidding.app.ws.io.entity.JobFileEntity;
 import com.easybidding.app.ws.repository.impl.AccountRepository;
 import com.easybidding.app.ws.repository.impl.CountryRepository;
 import com.easybidding.app.ws.repository.impl.CountyRepository;
+import com.easybidding.app.ws.repository.impl.JobAccountRepository;
+import com.easybidding.app.ws.repository.impl.JobCustomFieldRepository;
+import com.easybidding.app.ws.repository.impl.JobCustomNoteRepository;
 import com.easybidding.app.ws.repository.impl.JobFileRepository;
 import com.easybidding.app.ws.repository.impl.JobRepository;
 import com.easybidding.app.ws.repository.impl.StateRepository;
@@ -34,19 +39,26 @@ import com.easybidding.app.ws.service.JobFileService;
 import com.easybidding.app.ws.service.JobService;
 import com.easybidding.app.ws.shared.Utils;
 import com.easybidding.app.ws.shared.dto.AccountDto;
+import com.easybidding.app.ws.shared.dto.JobAccountDto;
 import com.easybidding.app.ws.shared.dto.JobCustomFieldDto;
 import com.easybidding.app.ws.shared.dto.JobCustomNoteDto;
 import com.easybidding.app.ws.shared.dto.JobDto;
 import com.easybidding.app.ws.shared.dto.JobFileDto;
-import com.easybidding.app.ws.shared.dto.JobFilesDto;
 
 @Service
 public class JobServiceImpl implements JobService {
 
-//	private static final Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
-
 	@Autowired
 	JobRepository jobRepository;
+
+	@Autowired
+	JobAccountRepository jobAccountRepository;
+
+	@Autowired
+	JobCustomNoteRepository noteRepository;
+	
+	@Autowired
+	JobCustomFieldRepository fieldRepository;
 
 	@Autowired
 	JobFileRepository fileRepository;
@@ -62,7 +74,7 @@ public class JobServiceImpl implements JobService {
 
 	@Autowired
 	CountyRepository countyRepository;
-	
+
 	@Autowired
 	JobFileService jobFileService;
 
@@ -83,7 +95,7 @@ public class JobServiceImpl implements JobService {
 
 	PropertyMap<JobDto, JobEntity> mapping = new PropertyMap<JobDto, JobEntity>() {
 		protected void configure() {
-			skip().setAccounts(null);
+			skip().setJobAccounts(null);
 			skip().setFiles(null);
 			skip().setFields(null);
 			skip().setCustomNotes(null);
@@ -97,6 +109,7 @@ public class JobServiceImpl implements JobService {
 
 	PropertyMap<JobEntity, JobDto> dtoMapping = new PropertyMap<JobEntity, JobDto>() {
 		protected void configure() {
+			skip().setAccounts(null);
 			skip().setFiles(null);
 			skip().setFields(null);
 			skip().setCustomNotes(null);
@@ -106,7 +119,7 @@ public class JobServiceImpl implements JobService {
 
 	@Override
 	public JobDto getJobById(String jobId) {
-		JobEntity entity = jobRepository.findJobById(jobId);
+		JobEntity entity = jobRepository.getOne(jobId);
 
 		if (entity == null)
 			throw new RuntimeException("No Jobs found");
@@ -137,49 +150,40 @@ public class JobServiceImpl implements JobService {
 	}
 
 	@Override
-	public List<JobDto> getAllJobsByAccount(String accountId) {
-		List<JobEntity> entities = jobRepository.findAllJobsByAccount(accountId);
+	public List<JobAccountDto> getAllJobsByAccountAndStatus(String accountId, String status) {
+		Set<JobAccountEntity> entities = jobAccountRepository.findAllJobsByAccountAndStatus(accountId, Status.valueOf(status));
 
 		if (entities == null) {
 			throw new RuntimeException("No Jobs found under this account");
 		}
-		return getDtosFromEntities(entities);
+		return getJobAccountDtosFromEntities(entities);
+	}
+	
+	@Override
+	@Transactional
+	public JobAccountDto changeJobStatus(JobAccountDto jobAccount) {
+		JobAccountEntity entity = jobAccountRepository.getOne(jobAccount.getId());
+
+		if (entity == null)
+			throw new RuntimeException("No Job found with ID: " + jobAccount.getId());
+
+		entity.setStatus(Status.valueOf(jobAccount.getStatus()));
+		
+		JobAccountEntity savedEntity = jobAccountRepository.save(entity);
+		return convertJobAccountEntityToDto(savedEntity);
 	}
 
 	@Override
-	public List<JobDto> getAllJobsByAccountAndStatus(String accountId, String status) {
-		Status enumStatus = JobEntity.Status.valueOf(status);
-		List<JobEntity> entities = jobRepository.findAllJobsByAccountAndStatus(accountId, enumStatus);
+	@Transactional
+	public void removeAccountJob(String jobAccountId) {
+		List<String> ids = new ArrayList<String>();
+		ids.add(jobAccountId);
+//		JobAccountEntity entity = jobAccountRepository.getOne(jobAccountId);
+//
+//		if (jobAccountId == null)
+//			throw new RuntimeException("No Jobs found");
 
-		if (entities == null) {
-			throw new RuntimeException("No Jobs found under this account");
-		}
-		return getDtosFromEntities(entities);
-	}
-
-	@Override
-	public Map<String, Object> getJobsByAccount(String accountId, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size);
-
-		Page<JobEntity> jobs = jobRepository.findJobsByAccount(accountId, pageable);
-
-		if (jobs.getContent() == null)
-			throw new RuntimeException("No Jobs found under this account");
-
-		return finalizePageResponse(jobs);
-	}
-
-	@Override
-	public Map<String, Object> getJobsByAccountAndStatus(String accountId, String status, int page, int size) {
-		Status enumStatus = JobEntity.Status.valueOf(status);
-		Pageable pageable = PageRequest.of(page, size);
-
-		Page<JobEntity> jobs = jobRepository.findJobsByAccountAndStatus(accountId, enumStatus, pageable);
-
-		if (jobs.getContent() == null)
-			throw new RuntimeException("No Jobs found under this account");
-
-		return finalizePageResponse(jobs);
+		jobAccountRepository.deleteByIdIn(ids);
 	}
 
 	/*
@@ -199,14 +203,6 @@ public class JobServiceImpl implements JobService {
 		}
 
 		JobEntity savedEntity = jobRepository.save(convertDtoToEntity(dto, entity));
-		
-		if (dto.getId() == null && dto.getUploads() != null) {
-			JobFilesDto filesDto = new JobFilesDto();
-			filesDto.setJobId(savedEntity.getId());
-			filesDto.setFiles(dto.getUploads());
-			List<JobFileDto> fileDtos = jobFileService.uploadFiles(filesDto);  
-		}
-
 		return convertEntityToDto(savedEntity);
 	}
 
@@ -257,9 +253,35 @@ public class JobServiceImpl implements JobService {
 
 		if (dto.getAccounts() != null && !dto.getAccounts().isEmpty()) {
 			List<String> ids = new ArrayList<String>();
-			for (AccountDto accountDto : dto.getAccounts())
+
+			for (AccountDto accountDto : dto.getAccounts()) {
 				ids.add(accountDto.getId());
-			entity.setAccounts(accountRepository.findAccountsByIds(ids));
+			}
+
+			Set<JobAccountEntity> jobAccounts = new HashSet<JobAccountEntity>();
+			if (dto.getId() == null) {
+				for (AccountEntity accountEntity : accountRepository.findAccountsByIds(ids)) {
+					JobAccountEntity jobAccountEntity = new JobAccountEntity();
+					jobAccountEntity.setId(utils.generateUniqueId(30));
+					jobAccountEntity.setAccount(accountEntity);
+					jobAccountEntity.setJob(entity);
+					jobAccounts.add(jobAccountEntity);
+				}
+				entity.setJobAccounts(jobAccounts);
+			} else {
+				for (JobAccountEntity jobAccount : entity.getJobAccounts()) {
+					if (ids.contains(jobAccount.getAccount().getId())) {
+						jobAccounts.add(jobAccount);
+					}
+				}
+			}
+
+			if (dto.getId() == null) {
+				entity.setJobAccounts(jobAccounts);
+			} else {
+				entity.getJobAccounts().clear();
+				entity.getJobAccounts().addAll(jobAccounts);
+			}
 		}
 
 		if (dto.getFiles() != null && !dto.getFiles().isEmpty()) {
@@ -277,38 +299,61 @@ public class JobServiceImpl implements JobService {
 
 		if (dto.getCustomNotes() != null && !dto.getCustomNotes().isEmpty()) {
 			List<JobCustomNoteEntity> notes = new ArrayList<JobCustomNoteEntity>();
+			
 			for (JobCustomNoteDto noteDto : dto.getCustomNotes()) {
 				if (noteDto.getId() == null) {
-					noteDto.setId(utils.generateUniqueId(30));
+					JobCustomNoteEntity noteEntity = new JobCustomNoteEntity();
+					noteEntity.setId(utils.generateUniqueId(30));
+					noteEntity.setNote(noteDto.getNote());
+					noteEntity.setAccount(accountRepository.getOne(noteDto.getAccount().getId()));
+					noteEntity.setJob(jobRepository.getOne(noteDto.getJob().getId()));
+					notes.add(noteEntity);
+				} else {
+					for (JobCustomNoteEntity noteEntity : entity.getCustomNotes()) {
+						if (noteDto.getAccount().getId().equals(noteEntity.getAccount().getId())) {
+							noteEntity.setNote(noteDto.getNote());
+						}
+						notes.add(noteEntity);	
+					}
 				}
-				JobCustomNoteEntity noteEntity = this.mapper.map(noteDto, JobCustomNoteEntity.class);
-				notes.add(noteEntity);
 			}
-			if (dto.getId() == null){
+
+			if (dto.getId() == null) {
 				entity.setCustomNotes(notes);
-			}
-			else {
+			} else {
 				entity.getCustomNotes().clear();
-				entity.getCustomNotes().addAll(notes);				
+				entity.getCustomNotes().addAll(notes);
 			}
 		}
 
 		if (dto.getFields() != null && !dto.getFields().isEmpty()) {
 			List<JobCustomFieldEntity> fields = new ArrayList<JobCustomFieldEntity>();
+			
 			for (JobCustomFieldDto fieldDto : dto.getFields()) {
 				if (fieldDto.getId() == null) {
-					fieldDto.setId(utils.generateUniqueId(30));
+					JobCustomFieldEntity fieldEntity = new JobCustomFieldEntity();
+					fieldEntity.setId(utils.generateUniqueId(30));
+					fieldEntity.setAccount(accountRepository.getOne(fieldDto.getAccount().getId()));
+					fieldEntity.setJob(entity);
+					fieldEntity.setFieldName(fieldDto.getFieldName());
+					fieldEntity.setFieldValue(fieldDto.getFieldValue());
+					fields.add(fieldEntity);
+				} else {
+					for (JobCustomFieldEntity fieldEntity : entity.getFields()) {
+						if (fieldEntity.getAccount().getId().equals(fieldDto.getAccount().getId())) {
+							fieldEntity.setFieldName(fieldDto.getFieldName());
+							fieldEntity.setFieldValue(fieldDto.getFieldValue());
+						}
+						fields.add(fieldEntity);
+					}
 				}
-				JobCustomFieldEntity fieldEntity = this.mapper.map(fieldDto, JobCustomFieldEntity.class);
-				fieldEntity.setJob(entity);
-				fields.add(fieldEntity);
 			}
-			if (dto.getId() == null){
+			
+			if (dto.getId() == null) {
 				entity.setFields(fields);
-			}
-			else {
+			} else {
 				entity.getFields().clear();
-				entity.getFields().addAll(fields);				
+				entity.getFields().addAll(fields);
 			}
 		}
 
@@ -337,6 +382,18 @@ public class JobServiceImpl implements JobService {
 	private JobDto convertEntityToDto(JobEntity entity) {
 		JobDto response = this.mapper.map(entity, JobDto.class);
 
+		if (entity.getJobAccounts() != null && !entity.getJobAccounts().isEmpty()) {
+			Set<AccountDto> accountDtos = new HashSet<AccountDto>();
+			for (JobAccountEntity jobAccountEntity : entity.getJobAccounts()) {
+				AccountDto accountDto = new AccountDto();
+				accountDto.setId(jobAccountEntity.getAccount().getId());
+				accountDto.setAccountName(jobAccountEntity.getAccount().getAccountName());
+				accountDto.setStatus(jobAccountEntity.getAccount().getStatus().toString());
+				accountDtos.add(accountDto);
+			}
+			response.setAccounts(accountDtos);
+		}
+		
 		if (entity.getFiles() != null && !entity.getFiles().isEmpty()) {
 			Set<JobFileEntity> entities = new HashSet<JobFileEntity>(entity.getFiles());
 			List<JobFileDto> files = new ArrayList<JobFileDto>();
@@ -346,14 +403,14 @@ public class JobServiceImpl implements JobService {
 				fileDto.setId(fileEntity.getId());
 				fileDto.setFileName(fileEntity.getFileName());
 				fileDto.setFilePath(fileEntity.getFilePath());
-				
+
 				if (fileEntity.getJob() != null) {
 					JobDto jobDto = new JobDto();
 					jobDto.setId(fileEntity.getJob().getId());
 					jobDto.setJobTitle(fileEntity.getJob().getJobTitle());
 					fileDto.setJob(jobDto);
 				}
-				
+
 				if (fileEntity.getAccount() != null) {
 					AccountDto accountDto = new AccountDto();
 					accountDto.setId(fileEntity.getAccount().getId());
@@ -364,7 +421,7 @@ public class JobServiceImpl implements JobService {
 			}
 			response.setFiles(files);
 		}
-		
+
 		if (entity.getCustomNotes() != null && !entity.getCustomNotes().isEmpty()) {
 			Set<JobCustomNoteEntity> entities = new HashSet<JobCustomNoteEntity>(entity.getCustomNotes());
 			List<JobCustomNoteDto> noteDtos = new ArrayList<JobCustomNoteDto>();
@@ -373,14 +430,14 @@ public class JobServiceImpl implements JobService {
 				JobCustomNoteDto noteDto = new JobCustomNoteDto();
 				noteDto.setId(noteEntity.getId());
 				noteDto.setNote(noteEntity.getNote());
-				
+
 				if (noteEntity.getJob() != null) {
 					JobDto jobDto = new JobDto();
 					jobDto.setId(noteEntity.getJob().getId());
 					jobDto.setJobTitle(noteEntity.getJob().getJobTitle());
 					noteDto.setJob(jobDto);
 				}
-				
+
 				if (noteEntity.getAccount() != null) {
 					AccountDto accountDto = new AccountDto();
 					accountDto.setId(noteEntity.getAccount().getId());
@@ -391,7 +448,7 @@ public class JobServiceImpl implements JobService {
 			}
 			response.setCustomNotes(noteDtos);
 		}
-		
+
 		if (entity.getFields() != null && !entity.getFields().isEmpty()) {
 			Set<JobCustomFieldEntity> entities = new HashSet<JobCustomFieldEntity>(entity.getFields());
 			List<JobCustomFieldDto> fields = new ArrayList<JobCustomFieldDto>();
@@ -401,14 +458,14 @@ public class JobServiceImpl implements JobService {
 				fieldDto.setId(fieldEntity.getId());
 				fieldDto.setFieldName(fieldEntity.getFieldName());
 				fieldDto.setFieldValue(fieldEntity.getFieldValue());
-				
+
 				if (fieldEntity.getJob() != null) {
 					JobDto jobDto = new JobDto();
 					jobDto.setId(fieldEntity.getJob().getId());
 					jobDto.setJobTitle(fieldEntity.getJob().getJobTitle());
 					fieldDto.setJob(jobDto);
 				}
-				
+
 				if (fieldEntity.getAccount() != null) {
 					AccountDto accountDto = new AccountDto();
 					accountDto.setId(fieldEntity.getAccount().getId());
@@ -432,6 +489,25 @@ public class JobServiceImpl implements JobService {
 		return dtos;
 	}
 
+	private JobAccountDto convertJobAccountEntityToDto(JobAccountEntity entity) {
+		JobAccountDto response = new JobAccountDto();
+		response.setId(entity.getId());
+		response.setAccount(this.mapper.map(entity.getAccount(), AccountDto.class));
+		response.setJob(this.mapper.map(entity.getJob(), JobDto.class));
+		response.setStatus(entity.getStatus().toString());
+
+		return response;
+	}
+	
+	private List<JobAccountDto> getJobAccountDtosFromEntities(Set<JobAccountEntity> entities) {
+		List<JobAccountDto> dtos = new ArrayList<JobAccountDto>();
+
+		for (JobAccountEntity entity : entities)
+			dtos.add(convertJobAccountEntityToDto(entity));
+
+		return dtos;
+	}
+	
 	private Map<String, Object> finalizePageResponse(Page<JobEntity> response) {
 		List<JobEntity> entities = response.getContent();
 		List<JobDto> dtos = getDtosFromEntities(entities);

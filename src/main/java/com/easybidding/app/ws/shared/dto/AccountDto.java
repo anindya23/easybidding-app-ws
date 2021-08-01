@@ -27,9 +27,6 @@ public class AccountDto {
 	private Date dateLastUpdated;
 	private Date dateLastActive;
 	private Set<JobDto> jobs = new HashSet<JobDto>();
-//	private List<AccountRoleDto> roles;
-//	private List<AccountInitParamDto> accountParams;
-//	private List<UserDto> users;
 
 	public String getId() {
 		return id;
@@ -184,30 +181,6 @@ public class AccountDto {
 	public void setJobs(Set<JobDto> jobs) {
 		this.jobs = jobs;
 	}
-//
-//	public List<AccountRoleDto> getRoles() {
-//		return roles;
-//	}
-//
-//	public void setRoles(List<AccountRoleDto> roles) {
-//		this.roles = roles;
-//	}
-//
-//	public List<AccountInitParamDto> getAccountParams() {
-//		return accountParams;
-//	}
-//
-//	public void setAccountParams(List<AccountInitParamDto> accountParams) {
-//		this.accountParams = accountParams;
-//	}
-//
-//	public List<UserDto> getUsers() {
-//		return users;
-//	}
-//
-//	public void setUsers(List<UserDto> users) {
-//		this.users = users;
-//	}
 
 	public Date getDateCreated() {
 		return dateCreated;

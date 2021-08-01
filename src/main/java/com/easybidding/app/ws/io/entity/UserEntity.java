@@ -72,10 +72,6 @@ public class UserEntity extends BaseEntity implements Serializable {
 	@JoinTable(name = "eb_user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<RoleEntity> roles = new HashSet<RoleEntity>();
 
-//	@ManyToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(name = "system_role")
-//	private SystemRoleEntity systemRole;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "county_id")
 	private CountyEntity county;

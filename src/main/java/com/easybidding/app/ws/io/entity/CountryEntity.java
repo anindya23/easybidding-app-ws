@@ -53,9 +53,6 @@ public class CountryEntity extends BaseEntity implements Serializable {
 	@Column(name = "date_last_updated")
 	private Date dateLastUpdated = new Date();
 
-//	@OneToMany(mappedBy = "country", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-//	private List<StateEntity> states = new ArrayList<StateEntity>();
-
 	public String getCountryCode() {
 		return countryCode;
 	}
@@ -95,19 +92,6 @@ public class CountryEntity extends BaseEntity implements Serializable {
 	public void setDateCreated(Date dateCreated) {
 		this.dateCreated = dateCreated;
 	}
-
-//	public List<StateEntity> getStates() {
-//		return states;
-//	}
-//
-//	public void addState(StateEntity state) {
-//		states.add(state);
-//		state.setCountry(this);
-//	}
-
-//	public void setStates(List<StateEntity> states) {
-//		this.states = states;
-//	}
 
 	public UserEntity getLastUpdatedBy() {
 		return lastUpdatedBy;

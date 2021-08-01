@@ -53,8 +53,6 @@ public class CountyServiceImpl implements CountyService {
 		protected void configure() {
 			skip().setDateCreated(null);
 			skip().setDateLastUpdated(null);
-//			skip().setDateCreated(null, null);
-//			skip().setDateLastUpdated(null, null);
 		}
 	};
 
@@ -116,18 +114,6 @@ public class CountyServiceImpl implements CountyService {
 
 		return entity;
 	}
-
-//	private Map<String, Object> finalizePageResponse(Page<CountyEntity> response) {
-//		List<CountyEntity> entities = response.getContent();
-//		List<CountyDto> dtos = getDtosFromEntities(entities);
-//
-//		Map<String, Object> responseModel = new HashMap<>();
-//		responseModel.put("content", dtos);
-//		responseModel.put("currentPage", response.getNumber());
-//		responseModel.put("totalItems", response.getTotalElements());
-//		responseModel.put("totalPages", response.getTotalPages());
-//		return responseModel;
-//	}
 
 	/*
 	 * Refactoring is needed in this method 1. Hardcoded timezone should be replaced

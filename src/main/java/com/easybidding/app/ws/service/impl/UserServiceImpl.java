@@ -43,8 +43,6 @@ import com.easybidding.app.ws.shared.dto.UserDto;
 
 @Service(value = "userService")
 public class UserServiceImpl implements UserService {
-
-//	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 	
 	@Autowired
 	UserRepository userRepository;
@@ -108,9 +106,6 @@ public class UserServiceImpl implements UserService {
 			skip().setDateCreated(null);
 			skip().setDateLastUpdated(null);
 			skip().setDateLastActive(null);
-//			skip().setDateCreated(null, null);
-//			skip().setDateLastUpdated(null, null);
-//			skip().setDateLastActive(null, null);
 		}
 	};
 
@@ -248,7 +243,6 @@ public class UserServiceImpl implements UserService {
 		}
 
 		UserEntity savedEntity = userRepository.save(convertDtoToEntity(dto, entity));
-//		return convertEntityToDto(savedEntity);
 		return this.mapper.map(savedEntity, UserDto.class);
 	}
 
@@ -313,12 +307,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void activateUser(UserEntity user) {
-//	public void activateUser(UserEntity user, HttpServletResponse res) {
 		user.setStatus(Status.ACTIVE);
-//		UserEntity entity = userRepository.save(user);
 		userRepository.save(user);
-
-//		authWithoutPassword(entity, res);
 	}
 
 	@Override
@@ -363,27 +353,6 @@ public class UserServiceImpl implements UserService {
 		user.setEmail(userName);
 		userRepository.save(user);		
 	}
-
-//	private void authWithoutPassword(UserEntity user, HttpServletResponse res) {
-//		Authentication auth = new UsernamePasswordAuthenticationToken(
-//				new User(user.getEmail(), user.getPassword(), getAuthority(user)), null, getAuthority(user));
-//		SecurityContextHolder.getContext().setAuthentication(auth);
-//
-//		String userName = ((User) auth.getPrincipal()).getUsername();
-//
-//		String token = Jwts.builder().setSubject(userName)
-//				.setExpiration(new Date(System.currentTimeMillis() + SecurityConstant.EXPIRATION_TIME))
-//				.signWith(SignatureAlgorithm.HS512, SecurityConstant.getTokenSecret()).compact();
-//
-//		UserEntity userEntity = userRepository.findByEmail(userName);
-//
-//		res.setContentType("application/json");
-//		res.setCharacterEncoding("UTF-8");
-//		res.addHeader(SecurityConstant.HEADER_STRING, SecurityConstant.TOKEN_PREFIX + token);
-//		res.addHeader("UserId", userEntity.getId());
-//		res.addHeader("Name", userEntity.getFirstName() + " " + userEntity.getLastName());
-//		res.addHeader("Roles", String.join(",", userEntity.getRoleCodes()));
-//	}
 
 	private boolean emailExists(String email) {
 		return userRepository.findByEmail(email) != null;
@@ -437,18 +406,6 @@ public class UserServiceImpl implements UserService {
 				if (role.getRoleCode() != null) {
 					entities.add(roleRepository.findByRoleCode(role.getRoleCode()));
 				}
-//				if (role.getId() != null) {
-//					entities.add(roleRepository.getOne(role.getId()));
-//				}
-//
-//				if (role.getRoleCode() != null && dto.getAccount() != null) {
-//					entities.add(roleRepository.findRoleByAccount(entity.getAccount().getId(), role.getRoleCode()));
-//				}
-//
-//				if (role.getRoleCode() != null && dto.getAccount() == null) {
-//					entities.add(roleRepository.findByRoleCode(role.getRoleCode()));
-//				}
-				
 			}
 			entity.setRoles(entities);
 		}

@@ -9,8 +9,6 @@ import java.util.Set;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,8 +29,6 @@ import com.easybidding.app.ws.shared.dto.JobDto;
 
 @Service
 public class JobCustomFieldServiceImpl implements JobCustomFieldService {
-
-	private static final Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
 
 	@Autowired
 	JobRepository jobRepository;

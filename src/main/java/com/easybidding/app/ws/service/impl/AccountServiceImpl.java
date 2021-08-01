@@ -24,6 +24,7 @@ import com.easybidding.app.ws.io.entity.StateEntity;
 import com.easybidding.app.ws.repository.impl.AccountRepository;
 import com.easybidding.app.ws.repository.impl.CountryRepository;
 import com.easybidding.app.ws.repository.impl.CountyRepository;
+import com.easybidding.app.ws.repository.impl.JobRepository;
 import com.easybidding.app.ws.repository.impl.StateRepository;
 import com.easybidding.app.ws.service.AccountService;
 import com.easybidding.app.ws.shared.Utils;
@@ -34,6 +35,9 @@ public class AccountServiceImpl implements AccountService {
 
 	@Autowired
 	AccountRepository accountRepository;
+
+	@Autowired
+	JobRepository jobRepository;
 
 	@Autowired
 	CountryRepository countryRepository;
@@ -58,7 +62,7 @@ public class AccountServiceImpl implements AccountService {
 
 	PropertyMap<AccountDto, AccountEntity> entityMapping = new PropertyMap<AccountDto, AccountEntity>() {
 		protected void configure() {
-			skip().setJobs(null);
+			skip().setJobAccounts(null);
 			skip().setCountry(null);
 			skip().setState(null);
 			skip().setCounty(null);
@@ -215,7 +219,7 @@ public class AccountServiceImpl implements AccountService {
 
 		if (dto.getId() != null) {
 			entity = accountRepository.getOne(dto.getId());
-		
+
 			if (entity == null)
 				throw new RuntimeException("No Account found with ID: " + dto.getId());
 		}
@@ -255,7 +259,8 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	/*
-	 * ============================== Service Util Methods =================================
+	 * ============================== Service Util Methods
+	 * =================================
 	 */
 	private AccountEntity convertDtoToEntity(AccountDto dto, AccountEntity entity) {
 		if (entity == null) {

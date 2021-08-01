@@ -57,9 +57,6 @@ public class StateEntity extends BaseEntity implements Serializable {
 	@Column(name = "date_last_updated")
 	private Date dateLastUpdated = new Date();
 
-//	@OneToMany(mappedBy = "state", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-//	private List<CountyEntity> counties = new ArrayList<CountyEntity>();
-
 	public String getStateCode() {
 		return stateCode;
 	}
@@ -123,18 +120,5 @@ public class StateEntity extends BaseEntity implements Serializable {
 	public void setDateLastUpdated(Date dateLastUpdated) {
 		this.dateLastUpdated = dateLastUpdated;
 	}
-
-//	public List<CountyEntity> getCounties() {
-//		return counties;
-//	}
-//
-//	public void addCounty(CountyEntity county) {
-//		counties.add(county);
-//		county.setState(this);
-//	}
-//
-//	public void setCounties(List<CountyEntity> counties) {
-//		this.counties = counties;
-//	}
 
 }

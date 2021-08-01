@@ -2,10 +2,8 @@ package com.easybidding.app.ws.io.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,8 +12,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -43,9 +39,6 @@ public class JobEntity extends BaseEntity implements Serializable {
 	@Column(columnDefinition = "TEXT")
 	private String jobDescription;
 
-//	@Column(columnDefinition = "TEXT")
-//	private String customNotes;
-
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "county_id")
 	private CountyEntity county;
@@ -61,18 +54,6 @@ public class JobEntity extends BaseEntity implements Serializable {
 	@Enumerated(EnumType.STRING)
 	@Column(columnDefinition = "ENUM('POSTED', 'INPROGRESS', 'COMPLETED')")
 	private Status status = Status.POSTED;
-
-//	@Temporal(TemporalType.TIMESTAMP)
-//	@Column(name = "date_published")
-//	private Date datePublished;
-//
-//	@Temporal(TemporalType.TIMESTAMP)
-//	@Column(name = "bidding_deadline")
-//	private Date biddingDeadline;
-//
-//	@Temporal(TemporalType.TIMESTAMP)
-//	@Column(name = "submission_deadline")
-//	private Date submissionDeadline;
 
 	@Column(name = "date_published")
 	private String datePublished;
@@ -99,19 +80,24 @@ public class JobEntity extends BaseEntity implements Serializable {
 	@Column(name = "date_last_updated")
 	private Date dateLastUpdated = new Date();
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST ,CascadeType.MERGE})
-	@JoinTable(name = "eb_account_jobs", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "account_id"))
-	private Set<AccountEntity> accounts = new HashSet<AccountEntity>();
+//	@ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST ,CascadeType.MERGE})
+//	@JoinTable(name = "eb_account_jobs", joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "account_id"))
+//	private Set<AccountEntity> accounts = new HashSet<AccountEntity>();
 
-	@OneToMany(mappedBy = "job", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
-	@Fetch(value = FetchMode.SUBSELECT) // Otherwise Child (File here) remove is not working. Need to study further. 
+	@OneToMany(mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@Fetch(value = FetchMode.SUBSELECT)
+	private Set<JobAccountEntity> jobAccounts;
+
+	@OneToMany(mappedBy = "job", cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE }, fetch = FetchType.EAGER, orphanRemoval = true)
+	@Fetch(value = FetchMode.SUBSELECT) // Otherwise Child (File here) remove is not working. Need to study further.
 	private List<JobFileEntity> files;
-	
-	@OneToMany(mappedBy = "job", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
+
+	@OneToMany(mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@Fetch(value = FetchMode.SUBSELECT)
 	private List<JobCustomFieldEntity> fields;
-	
-	@OneToMany(mappedBy = "job", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
+
+	@OneToMany(mappedBy = "job", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@Fetch(value = FetchMode.SUBSELECT)
 	private List<JobCustomNoteEntity> customNotes;
 
@@ -126,14 +112,6 @@ public class JobEntity extends BaseEntity implements Serializable {
 	public String getJobDescription() {
 		return jobDescription;
 	}
-
-//	public String getCustomNotes() {
-//		return customNotes;
-//	}
-//
-//	public void setCustomNotes(String customNotes) {
-//		this.customNotes = customNotes;
-//	}
 
 	public List<JobCustomNoteEntity> getCustomNotes() {
 		return customNotes;
@@ -178,30 +156,6 @@ public class JobEntity extends BaseEntity implements Serializable {
 	public void setStatus(Status status) {
 		this.status = status;
 	}
-
-//	public Date getDatePublished() {
-//		return datePublished;
-//	}
-//
-//	public void setDatePublished(Date datePublished) {
-//		this.datePublished = datePublished;
-//	}
-//
-//	public Date getBiddingDeadline() {
-//		return biddingDeadline;
-//	}
-//
-//	public void setBiddingDeadline(Date biddingDeadline) {
-//		this.biddingDeadline = biddingDeadline;
-//	}
-//
-//	public Date getSubmissionDeadline() {
-//		return submissionDeadline;
-//	}
-//
-//	public void setSubmissionDeadline(Date submissionDeadline) {
-//		this.submissionDeadline = submissionDeadline;
-//	}
 
 	public String getDatePublished() {
 		return datePublished;
@@ -259,22 +213,29 @@ public class JobEntity extends BaseEntity implements Serializable {
 		this.dateLastUpdated = dateLastUpdated;
 	}
 
-	public void addAccount(AccountEntity account) {
-		this.accounts.add(account);
-		account.getJobs().add(this);
+//	public void addAccount(AccountEntity account) {
+//		this.accounts.add(account);
+//		account.getJobs().add(this);
+//	}
+//
+//	public void removeAccount(AccountEntity account) {
+//		this.accounts.remove(account);
+//		account.getJobs().remove(this);
+//	}
+//
+//	public Set<AccountEntity> getAccounts() {
+//		return accounts;
+//	}
+//
+//	public void setAccounts(Set<AccountEntity> accounts) {
+//		this.accounts = accounts;
+//	}
+	public Set<JobAccountEntity> getJobAccounts() {
+		return jobAccounts;
 	}
 
-	public void removeAccount(AccountEntity account) {
-		this.accounts.remove(account);
-		account.getJobs().remove(this);
-	}
-
-	public Set<AccountEntity> getAccounts() {
-		return accounts;
-	}
-
-	public void setAccounts(Set<AccountEntity> accounts) {
-		this.accounts = accounts;
+	public void setJobAccounts(Set<JobAccountEntity> jobAccounts) {
+		this.jobAccounts = jobAccounts;
 	}
 
 	public List<JobFileEntity> getFiles() {
@@ -292,11 +253,11 @@ public class JobEntity extends BaseEntity implements Serializable {
 	public void setFields(List<JobCustomFieldEntity> fields) {
 		this.fields = fields;
 	}
-	
-	@Override
-	public String toString() {
-		return "Job{" + "Title = '" + jobTitle + '\'' + ", Accounts = '"
-				+ accounts.stream().map(AccountEntity::getId).collect(Collectors.toList()) + '\'' + '}';
-	}
+
+//	@Override
+//	public String toString() {
+//		return "Job{" + "Title = '" + jobTitle + '\'' + ", Accounts = '"
+//				+ accounts.stream().map(AccountEntity::getId).collect(Collectors.toList()) + '\'' + '}';
+//	}
 
 }

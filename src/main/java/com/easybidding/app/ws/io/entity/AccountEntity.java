@@ -2,7 +2,6 @@ package com.easybidding.app.ws.io.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,13 +12,14 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
 @Entity
@@ -99,21 +99,21 @@ public class AccountEntity extends BaseEntity implements Serializable {
 	@Column(name = "date_last_active")
 	private Date dateLastActive = new Date();
 
-	@ManyToMany(mappedBy = "accounts", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-	private Set<JobEntity> jobs = new HashSet<JobEntity>();
-	
-	@OneToMany(mappedBy = "account", cascade = {CascadeType.PERSIST ,CascadeType.MERGE}, fetch = FetchType.EAGER, orphanRemoval = true)
+//	@ManyToMany(mappedBy = "accounts", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+//	private Set<JobEntity> jobs = new HashSet<JobEntity>();
+
+	@OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@Fetch(value = FetchMode.SUBSELECT)
+	private Set<JobAccountEntity> jobAccounts;
+
+	@OneToMany(mappedBy = "account", cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE }, fetch = FetchType.EAGER, orphanRemoval = true)
 	private List<JobFileEntity> files;
 
-//	@OneToMany(mappedBy = "account", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, orphanRemoval = true)
-//	private List<AccountRoleEntity> roles = new ArrayList<AccountRoleEntity>();
-//
-//	@OneToMany(mappedBy = "account", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, orphanRemoval = true)
-//	private List<AccountInitParamEntity> accountParams = new ArrayList<AccountInitParamEntity>();
-//
-//	@OneToMany(mappedBy = "account", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, orphanRemoval = true)
-//	private List<UserEntity> users = new ArrayList<UserEntity>();
-
+	@OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@Fetch(value = FetchMode.SUBSELECT)
+	private List<JobCustomNoteEntity> customNotes;
+	
 	public String getAccountName() {
 		return accountName;
 	}
@@ -266,66 +266,28 @@ public class AccountEntity extends BaseEntity implements Serializable {
 		this.dateLastActive = dateLastActive;
 	}
 
-	public Set<JobEntity> getJobs() {
-		return jobs;
+	public Set<JobAccountEntity> getJobAccounts() {
+		return jobAccounts;
 	}
 
-	public void addJob(JobEntity job) {
-		this.jobs.add(job);
-		job.getAccounts().add(this);
+	public void setJobAccounts(Set<JobAccountEntity> jobAccounts) {
+		this.jobAccounts = jobAccounts;
 	}
 
-	public void removeAccount(JobEntity job) {
-		this.jobs.remove(job);
-		job.getAccounts().remove(this);
+	public List<JobFileEntity> getFiles() {
+		return files;
 	}
 
-	public void setJobs(Set<JobEntity> jobs) {
-		this.jobs = jobs;
+	public void setFiles(List<JobFileEntity> files) {
+		this.files = files;
 	}
 
-//	public List<AccountRoleEntity> getRoles() {
-//		return roles;
-//	}
-//
-//	public void addRole(AccountRoleEntity role) {
-//		roles.add(role);
-//		role.setAccount(this);
-//	}
-//
-//	public void setRoles(List<AccountRoleEntity> roles) {
-//		this.roles = roles;
-//	}
-//
-//	public List<AccountInitParamEntity> getAccountParams() {
-//		return accountParams;
-//	}
-//
-//	public void addAccountParam(AccountInitParamEntity accountParam) {
-//		accountParams.add(accountParam);
-//		accountParam.setAccount(this);
-//	}
-//
-//	public void setAccountParams(List<AccountInitParamEntity> accountParams) {
-//		this.accountParams = accountParams;
-//	}
-//
-//	public void addUser(UserEntity user) {
-//		users.add(user);
-//		user.setAccount(this);
-//	}
-//
-//	public List<UserEntity> getUsers() {
-//		return users;
-//	}
-//
-//	public void setUsers(List<UserEntity> users) {
-//		this.users = users;
-//	}
+	public List<JobCustomNoteEntity> getCustomNotes() {
+		return customNotes;
+	}
 
-	@Override
-	public String toString() {
-		return "Account {" + "Account ID = " + id + ", Account Name = '" + accountName + '\'' + '}';
+	public void setCustomNotes(List<JobCustomNoteEntity> customNotes) {
+		this.customNotes = customNotes;
 	}
 
 }

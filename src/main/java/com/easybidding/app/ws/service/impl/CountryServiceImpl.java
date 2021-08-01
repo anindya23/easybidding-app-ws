@@ -52,8 +52,6 @@ public class CountryServiceImpl implements CountryService {
 		protected void configure() {
 			skip().setDateCreated(null);
 			skip().setDateLastUpdated(null);
-//			skip().setDateCreated(null, null);
-//			skip().setDateLastUpdated(null, null);
 		}
 	};
 

@@ -81,9 +81,9 @@ public class JobFileServiceImpl implements JobFileService {
 
 	@Autowired
 	Utils utils;
-	
+
 	@Autowired
-    FilesStorageService fileStorageService;
+	FilesStorageService fileStorageService;
 
 	private ModelMapper mapper;
 
@@ -213,15 +213,15 @@ public class JobFileServiceImpl implements JobFileService {
 
 		if (jobFile == null)
 			throw new RuntimeException("No Files found");
-		
+
 		if (jobFile.getAccount().getId() != null) {
 			key = "jobs/" + jobFile.getJob().getId() + "/" + jobFile.getAccount().getId() + "/" + jobFile.getFileName();
 		} else {
-			key = "jobs/" + jobFile.getJob().getId() + "/" + jobFile.getFileName();	
+			key = "jobs/" + jobFile.getJob().getId() + "/" + jobFile.getFileName();
 		}
-		
+
 		amazonS3.deleteObject(bucket, key);
-		
+
 		JobEntity job = jobRepository.getOne(jobFile.getJob().getId());
 		job.getFiles().remove(jobFile);
 		jobRepository.save(job);
@@ -303,41 +303,16 @@ public class JobFileServiceImpl implements JobFileService {
 	}
 
 	@Override
-	public ResponseEntity<Resource> getAllFiles(HttpServletResponse response, String jobId, String accountId) throws IOException {
+	public ResponseEntity<Resource> getAllFiles(HttpServletResponse response, String jobId, String accountId)
+			throws IOException {
 		String name = "attachment_" + new Date().getTime() + ".zip";
-		String path = fileToZip(jobId, accountId, name);
+		fileToZip(jobId, accountId, name);
 		Resource resource = fileStorageService.loadFileAsResource(name);
 		String contentType = "application/octet-stream";
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
-//		OutputStream out = null;
-//		BufferedInputStream br = null;
-//
-//		try {
-//			String fileName = URLEncoder.encode(name, "UTF-8");
-//			br = new BufferedInputStream(new FileInputStream(path));
-//			out = response.getOutputStream();
-//
-//			response.reset();
-//			response.setContentType("application/octet-stream");
-//			response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-//
-//			int len = 0;
-//			byte[] buf = new byte[1024];
-//
-//			while ((len = br.read(buf)) > 0)
-//				out.write(buf, 0, len);
-//
-//			out.flush();
-//		} catch (Exception ex) {
-//			ex.printStackTrace();
-//		} finally {
-//			br.close();
-//			out.close();
-//		}
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+				.body(resource);
 	}
 
 	/*
@@ -373,30 +348,24 @@ public class JobFileServiceImpl implements JobFileService {
 			zos = new ZipOutputStream(new BufferedOutputStream(fos));
 
 			byte[] content = new byte[1024 * 10];
-			
+
 			String jobDir = getS3Dir(jobId, null);
 			String accountDir = getS3Dir(jobId, accountId);
-			List<S3ObjectSummary> objectSummaries = amazonS3.listObjects(
-					bucket, jobDir).getObjectSummaries();
-			
+			List<S3ObjectSummary> objectSummaries = amazonS3.listObjects(bucket, jobDir).getObjectSummaries();
+
 			for (S3ObjectSummary objectSummary : objectSummaries) {
-//				System.out.println("S3Dir: " + s3Dir);
-//				System.out.println("Key: " + objectSummary.getKey());
-//				System.out.println("Substring: " + objectSummary.getKey().substring(0, objectSummary.getKey().lastIndexOf("/")));
-//				System.out.println("========================================");
-				
 				String s3Path = objectSummary.getKey().substring(0, objectSummary.getKey().lastIndexOf("/"));
-				
+
 				if (!jobDir.equals(s3Path + "/") && !accountDir.equals(s3Path + "/"))
 					continue;
-					
+
 				S3Object obj = amazonS3.getObject(bucket, objectSummary.getKey());
 				S3ObjectInputStream stream = obj.getObjectContent();
 				bis = new BufferedInputStream(stream);
 
 				ZipEntry zipEntry = new ZipEntry(objectSummary.getKey());
-                zos.putNextEntry(zipEntry);
-                
+				zos.putNextEntry(zipEntry);
+
 				int read = 0;
 				while ((read = bis.read(content, 0, 1024 * 10)) != -1) {
 					zos.write(content, 0, read);
@@ -514,7 +483,7 @@ public class JobFileServiceImpl implements JobFileService {
 		}
 		return response;
 	}
-	
+
 	private List<JobFileDto> getDtosFromEntities(List<JobFileEntity> entities) {
 		List<JobFileDto> dtos = new ArrayList<JobFileDto>();
 

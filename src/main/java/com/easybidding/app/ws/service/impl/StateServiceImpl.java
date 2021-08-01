@@ -49,8 +49,6 @@ public class StateServiceImpl implements StateService {
 			skip().setCounties(null);
 			skip().setDateCreated(null);
 			skip().setDateLastUpdated(null);
-//			skip().setDateCreated(null, null);
-//			skip().setDateLastUpdated(null, null);
 		}
 	};
 
@@ -90,8 +88,7 @@ public class StateServiceImpl implements StateService {
 	}
 
 	/*
-	 * ============================== Service Util Methods
-	 * =================================
+	 * ============================== Service Util Methods =================================
 	 */
 	private StateEntity convertDtoToEntity(StateDto dto, StateEntity entity) {
 		if (entity == null) {
@@ -107,18 +104,6 @@ public class StateServiceImpl implements StateService {
 
 		return entity;
 	}
-
-//	private Map<String, Object> finalizePageResponse(Page<StateEntity> response) {
-//		List<StateEntity> entities = response.getContent();
-//		List<StateDto> dtos = getDtosFromEntities(entities);
-//
-//		Map<String, Object> responseModel = new HashMap<>();
-//		responseModel.put("content", dtos);
-//		responseModel.put("currentPage", response.getNumber());
-//		responseModel.put("totalItems", response.getTotalElements());
-//		responseModel.put("totalPages", response.getTotalPages());
-//		return responseModel;
-//	}
 
 	/*
 	 * Refactoring is needed in this method 1. Hardcoded timezone should be replaced

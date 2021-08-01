@@ -23,8 +23,6 @@ public class JobDto {
 	private String biddingDeadline;
 	private String submissionDeadline;
 	private String status;
-//	private UserDto createdBy;
-//	private UserDto lastUpdatedBy;
 	private Date dateCreated;
 	private Date dateLastUpdated;
 
@@ -90,18 +88,6 @@ public class JobDto {
 		this.country = country;
 	}
 
-//	public Date getDatePublished() {
-//		Date d = null;
-//		if (datePublished != null) {
-//			try {
-//				d = format.parse(datePublished);
-//			} catch (ParseException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		return d;
-//	}
-
 	public String getDatePublished() {
 		return datePublished;
 	}
@@ -110,18 +96,6 @@ public class JobDto {
 		this.datePublished = datePublished;
 	}
 
-//	public Date getBiddingDeadline() {
-//		Date d = null;
-//		if (biddingDeadline != null) {
-//			try {
-//				d = format.parse(biddingDeadline);
-//			} catch (ParseException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		return d;
-//	}
-
 	public String getBiddingDeadline() {
 		return biddingDeadline;
 	}
@@ -129,18 +103,6 @@ public class JobDto {
 	public void setBiddingDeadline(String biddingDeadline) {
 		this.biddingDeadline = biddingDeadline;
 	}
-
-//	public Date getSubmissionDeadline() {
-//		Date d = null;
-//		if (submissionDeadline != null) {
-//			try {
-//				d = format.parse(submissionDeadline);
-//			} catch (ParseException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		return d;
-//	}
 
 	public String getSubmissionDeadline() {
 		return submissionDeadline;

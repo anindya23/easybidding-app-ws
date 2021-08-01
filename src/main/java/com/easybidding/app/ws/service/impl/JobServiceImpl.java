@@ -13,12 +13,17 @@ import javax.persistence.PersistenceContext;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.easybidding.app.ws.io.entity.AccountEntity;
 import com.easybidding.app.ws.io.entity.JobAccountEntity;
 import com.easybidding.app.ws.io.entity.JobAccountEntity.Status;
@@ -49,6 +54,12 @@ import com.easybidding.app.ws.shared.dto.JobFileDto;
 public class JobServiceImpl implements JobService {
 
 	@Autowired
+	private AmazonS3 amazonS3;
+
+	@Value("${aws.s3.bucket}")
+	private String bucket;
+
+	@Autowired
 	JobRepository jobRepository;
 
 	@Autowired
@@ -56,7 +67,7 @@ public class JobServiceImpl implements JobService {
 
 	@Autowired
 	JobCustomNoteRepository noteRepository;
-	
+
 	@Autowired
 	JobCustomFieldRepository fieldRepository;
 
@@ -151,14 +162,15 @@ public class JobServiceImpl implements JobService {
 
 	@Override
 	public List<JobAccountDto> getAllJobsByAccountAndStatus(String accountId, String status) {
-		Set<JobAccountEntity> entities = jobAccountRepository.findAllJobsByAccountAndStatus(accountId, Status.valueOf(status));
+		Set<JobAccountEntity> entities = jobAccountRepository.findAllJobsByAccountAndStatus(accountId,
+				Status.valueOf(status));
 
 		if (entities == null) {
 			throw new RuntimeException("No Jobs found under this account");
 		}
 		return getJobAccountDtosFromEntities(entities);
 	}
-	
+
 	@Override
 	@Transactional
 	public JobAccountDto changeJobStatus(JobAccountDto jobAccount) {
@@ -168,22 +180,30 @@ public class JobServiceImpl implements JobService {
 			throw new RuntimeException("No Job found with ID: " + jobAccount.getId());
 
 		entity.setStatus(Status.valueOf(jobAccount.getStatus()));
-		
+
 		JobAccountEntity savedEntity = jobAccountRepository.save(entity);
 		return convertJobAccountEntityToDto(savedEntity);
 	}
 
 	@Override
 	@Transactional
-	public void removeAccountJob(String jobAccountId) {
-		List<String> ids = new ArrayList<String>();
-		ids.add(jobAccountId);
-//		JobAccountEntity entity = jobAccountRepository.getOne(jobAccountId);
-//
-//		if (jobAccountId == null)
-//			throw new RuntimeException("No Jobs found");
+	public void removeAccountJob(String id) {
+		JobAccountEntity entity = jobAccountRepository.getOne(id);
 
-		jobAccountRepository.deleteByIdIn(ids);
+		if (entity == null)
+			throw new RuntimeException("No Record found");
+
+		String key = "jobs/" + entity.getJob().getId() + "/" + entity.getAccount().getId();
+		
+		if (amazonS3.doesObjectExist(bucket, key)) {
+			deleteDirectory(key);	
+		}
+
+		JobEntity job = jobRepository.getOne(entity.getJob().getId());
+		AccountEntity account = accountRepository.getOne(entity.getAccount().getId());
+		job.getJobAccounts().remove(entity);
+		account.getJobAccounts().remove(entity);
+		jobRepository.save(job);
 	}
 
 	/*
@@ -237,6 +257,17 @@ public class JobServiceImpl implements JobService {
 		jobRepository.deleteByIdIn(ids);
 	}
 
+	public void deleteDirectory(String prefix) {
+	    ObjectListing objectList = amazonS3.listObjects( bucket, prefix );
+	    List<S3ObjectSummary> objectSummeryList =  objectList.getObjectSummaries();
+	    String[] keysList = new String[ objectSummeryList.size() ];
+	    int count = 0;
+	    for( S3ObjectSummary summery : objectSummeryList ) {
+	        keysList[count++] = summery.getKey();
+	    }
+	    DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest( bucket ).withKeys( keysList );
+	    amazonS3.deleteObjects(deleteObjectsRequest);
+	}
 	/*
 	 * Refactoring 1. Conversion shouldn't be here. It's Not Service Layer's
 	 * responsibility. It's the duty of the layer which is going to use Service
@@ -299,7 +330,7 @@ public class JobServiceImpl implements JobService {
 
 		if (dto.getCustomNotes() != null && !dto.getCustomNotes().isEmpty()) {
 			List<JobCustomNoteEntity> notes = new ArrayList<JobCustomNoteEntity>();
-			
+
 			for (JobCustomNoteDto noteDto : dto.getCustomNotes()) {
 				if (noteDto.getId() == null) {
 					JobCustomNoteEntity noteEntity = new JobCustomNoteEntity();
@@ -313,7 +344,7 @@ public class JobServiceImpl implements JobService {
 						if (noteDto.getAccount().getId().equals(noteEntity.getAccount().getId())) {
 							noteEntity.setNote(noteDto.getNote());
 						}
-						notes.add(noteEntity);	
+						notes.add(noteEntity);
 					}
 				}
 			}
@@ -328,7 +359,7 @@ public class JobServiceImpl implements JobService {
 
 		if (dto.getFields() != null && !dto.getFields().isEmpty()) {
 			List<JobCustomFieldEntity> fields = new ArrayList<JobCustomFieldEntity>();
-			
+
 			for (JobCustomFieldDto fieldDto : dto.getFields()) {
 				if (fieldDto.getId() == null) {
 					JobCustomFieldEntity fieldEntity = new JobCustomFieldEntity();
@@ -348,7 +379,7 @@ public class JobServiceImpl implements JobService {
 					}
 				}
 			}
-			
+
 			if (dto.getId() == null) {
 				entity.setFields(fields);
 			} else {
@@ -393,7 +424,7 @@ public class JobServiceImpl implements JobService {
 			}
 			response.setAccounts(accountDtos);
 		}
-		
+
 		if (entity.getFiles() != null && !entity.getFiles().isEmpty()) {
 			Set<JobFileEntity> entities = new HashSet<JobFileEntity>(entity.getFiles());
 			List<JobFileDto> files = new ArrayList<JobFileDto>();
@@ -498,7 +529,7 @@ public class JobServiceImpl implements JobService {
 
 		return response;
 	}
-	
+
 	private List<JobAccountDto> getJobAccountDtosFromEntities(Set<JobAccountEntity> entities) {
 		List<JobAccountDto> dtos = new ArrayList<JobAccountDto>();
 
@@ -507,7 +538,7 @@ public class JobServiceImpl implements JobService {
 
 		return dtos;
 	}
-	
+
 	private Map<String, Object> finalizePageResponse(Page<JobEntity> response) {
 		List<JobEntity> entities = response.getContent();
 		List<JobDto> dtos = getDtosFromEntities(entities);

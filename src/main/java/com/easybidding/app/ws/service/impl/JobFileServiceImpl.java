@@ -214,7 +214,7 @@ public class JobFileServiceImpl implements JobFileService {
 		if (jobFile == null)
 			throw new RuntimeException("No Files found");
 
-		if (jobFile.getAccount().getId() != null) {
+		if (jobFile.getAccount() != null) {
 			key = "jobs/" + jobFile.getJob().getId() + "/" + jobFile.getAccount().getId() + "/" + jobFile.getFileName();
 		} else {
 			key = "jobs/" + jobFile.getJob().getId() + "/" + jobFile.getFileName();

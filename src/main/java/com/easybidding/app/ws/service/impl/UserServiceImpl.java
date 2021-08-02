@@ -30,7 +30,6 @@ import com.easybidding.app.ws.io.entity.UserEntity.Status;
 import com.easybidding.app.ws.io.entity.VerificationTokenEntity;
 import com.easybidding.app.ws.repository.impl.AccountRepository;
 import com.easybidding.app.ws.repository.impl.CountryRepository;
-import com.easybidding.app.ws.repository.impl.CountyRepository;
 import com.easybidding.app.ws.repository.impl.RoleRepository;
 import com.easybidding.app.ws.repository.impl.StateRepository;
 import com.easybidding.app.ws.repository.impl.UserRepository;
@@ -43,7 +42,7 @@ import com.easybidding.app.ws.shared.dto.UserDto;
 
 @Service(value = "userService")
 public class UserServiceImpl implements UserService {
-	
+
 	@Autowired
 	UserRepository userRepository;
 
@@ -58,9 +57,6 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	StateRepository stateRepository;
-
-	@Autowired
-	CountyRepository countyRepository;
 
 	@Autowired
 	VerificationTokenRepository tokenRepository;
@@ -89,7 +85,6 @@ public class UserServiceImpl implements UserService {
 			skip().setAccount(null);
 			skip().setCountry(null);
 			skip().setState(null);
-			skip().setCounty(null);
 			skip().setRoles(null);
 			skip().setPassword(null);
 			skip().setDateCreated(null);
@@ -351,7 +346,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void changeUsername(UserEntity user, String userName) {
 		user.setEmail(userName);
-		userRepository.save(user);		
+		userRepository.save(user);
 	}
 
 	private boolean emailExists(String email) {
@@ -367,7 +362,6 @@ public class UserServiceImpl implements UserService {
 
 		tokenRepository.delete(entity);
 	}
-
 
 	private UserEntity convertDtoToEntity(UserDto dto, UserEntity entity) {
 		if (dto.getId() == null) {
@@ -423,10 +417,6 @@ public class UserServiceImpl implements UserService {
 					stateRepository.findByStateCode(dto.getState().getStateCode(), dto.getCountry().getCountryCode()));
 		}
 
-		if (dto.getCounty() != null && dto.getState() != null && dto.getCountry() != null) {
-			entity.setCounty(countyRepository.findByCountyCode(dto.getCounty().getCountyCode(),
-					dto.getState().getStateCode(), dto.getCountry().getCountryCode()));
-		}
 		return entity;
 	}
 
@@ -437,7 +427,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	private UserDto convertEntityToDto(UserEntity entity) {
 		UserDto response = this.mapper.map(entity, UserDto.class);
-		
+
 		if (entity.getAccount() != null)
 			response.setAccount(this.mapper.map(entity.getAccount(), AccountDto.class));
 

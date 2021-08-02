@@ -53,13 +53,16 @@ public class UserEntity extends BaseEntity implements Serializable {
 	private String city;
 
 	@Column(length = 255)
-	private String district;
+	private String county;
 
 	@Column(length = 50)
 	private String postCode;
 
 	@Column(length = 50)
 	private String telephone;
+
+	@Column(length = 50)
+	private String extNum;
 
 	@Column(length = 50)
 	private String mobile;
@@ -71,10 +74,6 @@ public class UserEntity extends BaseEntity implements Serializable {
 	@ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	@JoinTable(name = "eb_user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<RoleEntity> roles = new HashSet<RoleEntity>();
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "county_id")
-	private CountyEntity county;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "state_id")
@@ -156,12 +155,12 @@ public class UserEntity extends BaseEntity implements Serializable {
 		this.city = city;
 	}
 
-	public String getDistrict() {
-		return district;
+	public String getCounty() {
+		return county;
 	}
 
-	public void setDistrict(String district) {
-		this.district = district;
+	public void setCounty(String county) {
+		this.county = county;
 	}
 
 	public String getPostCode() {
@@ -178,6 +177,14 @@ public class UserEntity extends BaseEntity implements Serializable {
 
 	public void setTelephone(String telephone) {
 		this.telephone = telephone;
+	}
+
+	public String getExtNum() {
+		return extNum;
+	}
+
+	public void setExtNum(String extNum) {
+		this.extNum = extNum;
 	}
 
 	public String getMobile() {
@@ -219,14 +226,6 @@ public class UserEntity extends BaseEntity implements Serializable {
 
 	public void setRoles(Set<RoleEntity> roles) {
 		this.roles = roles;
-	}
-
-	public CountyEntity getCounty() {
-		return county;
-	}
-
-	public void setCounty(CountyEntity county) {
-		this.county = county;
 	}
 
 	public StateEntity getState() {

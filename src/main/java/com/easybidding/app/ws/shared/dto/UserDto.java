@@ -28,9 +28,10 @@ public class UserDto {
 	private String lastName;
 	private String address;
 	private String city;
-	private String district;
+	private String county;
 	private String postCode;
 	private String telephone;
+	private String extNum;
 	private String mobile;
 
 	@ValidPassword
@@ -40,7 +41,6 @@ public class UserDto {
 
 	private AccountDto account;
 	private Set<RoleDto> roles;
-	private CountyDto county;
 	private StateDto state;
 	private CountryDto country;
 	private String status;
@@ -98,12 +98,12 @@ public class UserDto {
 		this.city = city;
 	}
 
-	public String getDistrict() {
-		return district;
+	public String getCounty() {
+		return county;
 	}
 
-	public void setDistrict(String district) {
-		this.district = district;
+	public void setCounty(String county) {
+		this.county = county;
 	}
 
 	public String getPostCode() {
@@ -120,6 +120,14 @@ public class UserDto {
 
 	public void setTelephone(String telephone) {
 		this.telephone = telephone;
+	}
+
+	public String getExtNum() {
+		return extNum;
+	}
+
+	public void setExtNum(String extNum) {
+		this.extNum = extNum;
 	}
 
 	public String getMobile() {
@@ -160,14 +168,6 @@ public class UserDto {
 
 	public void setRoles(Set<RoleDto> roles) {
 		this.roles = roles;
-	}
-
-	public CountyDto getCounty() {
-		return county;
-	}
-
-	public void setCounty(CountyDto county) {
-		this.county = county;
 	}
 
 	public StateDto getState() {

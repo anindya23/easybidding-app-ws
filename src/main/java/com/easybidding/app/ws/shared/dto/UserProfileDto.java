@@ -18,11 +18,10 @@ public class UserProfileDto {
 	private String lastName;
 	private String address;
 	private String city;
-	private String district;
+	private String county;
 	private String postCode;
 	private String telephone;
 	private String mobile;
-	private CountyDto county;
 	private StateDto state;
 	private CountryDto country;
 	private String status;
@@ -80,12 +79,12 @@ public class UserProfileDto {
 		this.city = city;
 	}
 
-	public String getDistrict() {
-		return district;
+	public String getCounty() {
+		return county;
 	}
 
-	public void setDistrict(String district) {
-		this.district = district;
+	public void setCounty(String county) {
+		this.county = county;
 	}
 
 	public String getPostCode() {
@@ -110,14 +109,6 @@ public class UserProfileDto {
 
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
-	}
-
-	public CountyDto getCounty() {
-		return county;
-	}
-
-	public void setCounty(CountyDto county) {
-		this.county = county;
 	}
 
 	public StateDto getState() {

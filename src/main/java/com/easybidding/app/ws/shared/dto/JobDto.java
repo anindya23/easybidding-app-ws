@@ -16,7 +16,10 @@ public class JobDto {
 	private String id;
 	private String jobTitle;
 	private String jobDescription;
+	private String address;
+	private String city;
 	private String county;
+	private String postCode;
 	private StateDto state;
 	private CountryDto country;
 	private String datePublished;
@@ -64,12 +67,36 @@ public class JobDto {
 		this.customNotes = customNotes;
 	}
 
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
 	public String getCounty() {
 		return county;
 	}
 
 	public void setCounty(String county) {
 		this.county = county;
+	}
+
+	public String getPostCode() {
+		return postCode;
+	}
+
+	public void setPostCode(String postCode) {
+		this.postCode = postCode;
 	}
 
 	public StateDto getState() {

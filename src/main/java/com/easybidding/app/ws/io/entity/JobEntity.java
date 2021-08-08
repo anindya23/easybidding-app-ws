@@ -39,12 +39,17 @@ public class JobEntity extends BaseEntity implements Serializable {
 	@Column(columnDefinition = "TEXT")
 	private String jobDescription;
 
-//	@ManyToOne(fetch = FetchType.EAGER)
-//	@JoinColumn(name = "county_id")
-//	private CountyEntity county;
+	@Column(columnDefinition = "TEXT")
+	private String address;
+
+	@Column(length = 255)
+	private String city;
 	
 	@Column(length = 255)
 	private String county;
+	
+	@Column(length = 50)
+	private String postCode;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "state_id")
@@ -128,12 +133,36 @@ public class JobEntity extends BaseEntity implements Serializable {
 		this.jobDescription = jobDescription;
 	}
 
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
 	public String getCounty() {
 		return county;
 	}
 
 	public void setCounty(String county) {
 		this.county = county;
+	}
+
+	public String getPostCode() {
+		return postCode;
+	}
+
+	public void setPostCode(String postCode) {
+		this.postCode = postCode;
 	}
 
 	public StateEntity getState() {

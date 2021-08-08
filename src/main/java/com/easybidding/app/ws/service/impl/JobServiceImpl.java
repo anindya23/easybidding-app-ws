@@ -112,7 +112,6 @@ public class JobServiceImpl implements JobService {
 			skip().setCustomNotes(null);
 			skip().setCountry(null);
 			skip().setState(null);
-			skip().setCounty(null);
 			skip().setDateCreated(null);
 			skip().setDateLastUpdated(null);
 		}
@@ -395,11 +394,6 @@ public class JobServiceImpl implements JobService {
 		if (dto.getState() != null && dto.getCountry() != null) {
 			entity.setState(
 					stateRepository.findByStateCode(dto.getState().getStateCode(), dto.getCountry().getCountryCode()));
-		}
-
-		if (dto.getCounty() != null && dto.getState() != null && dto.getCountry() != null) {
-			entity.setCounty(countyRepository.findByCountyCode(dto.getCounty().getCountyCode(),
-					dto.getState().getStateCode(), dto.getCountry().getCountryCode()));
 		}
 
 		return entity;

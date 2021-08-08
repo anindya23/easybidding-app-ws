@@ -16,7 +16,7 @@ public class JobDto {
 	private String id;
 	private String jobTitle;
 	private String jobDescription;
-	private CountyDto county;
+	private String county;
 	private StateDto state;
 	private CountryDto country;
 	private String datePublished;
@@ -64,11 +64,11 @@ public class JobDto {
 		this.customNotes = customNotes;
 	}
 
-	public CountyDto getCounty() {
+	public String getCounty() {
 		return county;
 	}
 
-	public void setCounty(CountyDto county) {
+	public void setCounty(String county) {
 		this.county = county;
 	}
 

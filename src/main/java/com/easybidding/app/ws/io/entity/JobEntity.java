@@ -39,9 +39,12 @@ public class JobEntity extends BaseEntity implements Serializable {
 	@Column(columnDefinition = "TEXT")
 	private String jobDescription;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "county_id")
-	private CountyEntity county;
+//	@ManyToOne(fetch = FetchType.EAGER)
+//	@JoinColumn(name = "county_id")
+//	private CountyEntity county;
+	
+	@Column(length = 255)
+	private String county;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "state_id")
@@ -125,12 +128,12 @@ public class JobEntity extends BaseEntity implements Serializable {
 		this.jobDescription = jobDescription;
 	}
 
-	public CountyEntity getCounty() {
+	public String getCounty() {
 		return county;
 	}
 
-	public void setCounty(CountyEntity countyEntity) {
-		this.county = countyEntity;
+	public void setCounty(String county) {
+		this.county = county;
 	}
 
 	public StateEntity getState() {
@@ -213,23 +216,6 @@ public class JobEntity extends BaseEntity implements Serializable {
 		this.dateLastUpdated = dateLastUpdated;
 	}
 
-//	public void addAccount(AccountEntity account) {
-//		this.accounts.add(account);
-//		account.getJobs().add(this);
-//	}
-//
-//	public void removeAccount(AccountEntity account) {
-//		this.accounts.remove(account);
-//		account.getJobs().remove(this);
-//	}
-//
-//	public Set<AccountEntity> getAccounts() {
-//		return accounts;
-//	}
-//
-//	public void setAccounts(Set<AccountEntity> accounts) {
-//		this.accounts = accounts;
-//	}
 	public Set<JobAccountEntity> getJobAccounts() {
 		return jobAccounts;
 	}
@@ -253,11 +239,5 @@ public class JobEntity extends BaseEntity implements Serializable {
 	public void setFields(List<JobCustomFieldEntity> fields) {
 		this.fields = fields;
 	}
-
-//	@Override
-//	public String toString() {
-//		return "Job{" + "Title = '" + jobTitle + '\'' + ", Accounts = '"
-//				+ accounts.stream().map(AccountEntity::getId).collect(Collectors.toList()) + '\'' + '}';
-//	}
 
 }

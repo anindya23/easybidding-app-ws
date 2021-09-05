@@ -38,5 +38,8 @@ public interface JobCustomFieldRepository extends BaseRepository<JobCustomFieldE
 	
 	@Query("SELECT jcf FROM JobCustomFieldEntity jcf LEFT JOIN jcf.job j LEFT JOIN jcf.account a WHERE j.id = :jobId AND a.id = :accountId")
 	List<JobCustomFieldEntity> findAllFieldsByJobAndAccount(@Param("jobId") String jobId, @Param("accountId") String accountId);
+	
+	@Query("SELECT jcf FROM JobCustomFieldEntity jcf LEFT JOIN jcf.account a WHERE a.id = :accountId")
+	List<JobCustomFieldEntity> findAllFieldsByAccount(@Param("accountId") String accountId);
 
 }

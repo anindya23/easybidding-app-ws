@@ -128,6 +128,17 @@ public class UsersController {
 		return mapper.map(savedDto, UserDetailDto.class);
 	}
 
+	@PreAuthorize("hasAnyRole('SYS_ADMIN')")
+	@PostMapping("/system/user")
+	@Transactional
+	public UserDetailDto createSystemUser(@Valid @RequestBody UserDetailDto request, final HttpServletRequest httpRequest)
+			throws ParseException {
+		UserDto savedDto = userService.save(mapper.map(request, UserDto.class));
+		eventPublisher.publishEvent(
+				new OnRegistrationCompleteEvent(savedDto, httpRequest.getLocale(), utils.getAppUrl(httpRequest)));
+		return mapper.map(request, UserDetailDto.class);
+	}
+	
 	@PutMapping("/user")
 	public UserDetailDto updateUser(@Valid @RequestBody UserDetailDto request) {
 		UserEntity user = userRepository.getOne(request.getId());

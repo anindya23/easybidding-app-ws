@@ -24,6 +24,8 @@ import com.easybidding.app.ws.io.entity.StateEntity;
 import com.easybidding.app.ws.repository.impl.AccountRepository;
 import com.easybidding.app.ws.repository.impl.CountryRepository;
 import com.easybidding.app.ws.repository.impl.CountyRepository;
+import com.easybidding.app.ws.repository.impl.JobCustomFieldRepository;
+import com.easybidding.app.ws.repository.impl.JobCustomNoteRepository;
 import com.easybidding.app.ws.repository.impl.JobRepository;
 import com.easybidding.app.ws.repository.impl.StateRepository;
 import com.easybidding.app.ws.service.AccountService;
@@ -47,6 +49,12 @@ public class AccountServiceImpl implements AccountService {
 
 	@Autowired
 	CountyRepository countyRepository;
+	
+	@Autowired
+	JobCustomFieldRepository fieldRepository;
+	
+	@Autowired
+	JobCustomNoteRepository noteRepository;
 
 	@Autowired
 	Utils utils;
@@ -229,6 +237,7 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
+	@Transactional
 	public void delete(String id) {
 		AccountEntity entity = accountRepository.getOne(id);
 

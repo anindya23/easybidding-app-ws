@@ -402,6 +402,10 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			entity.setRoles(entities);
+		} else {
+			Set<RoleEntity> entities = new HashSet<RoleEntity>();
+			entities.add(roleRepository.findByRoleCode("SYS_ADMIN"));
+			entity.setRoles(entities );
 		}
 
 		if (dto.getPassword() != null) {

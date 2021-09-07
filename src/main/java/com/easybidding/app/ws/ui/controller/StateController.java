@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.easybidding.app.ws.exception.ResourceNotFoundException;
 import com.easybidding.app.ws.service.StateService;
 import com.easybidding.app.ws.shared.dto.StateDto;
+import com.easybidding.app.ws.ui.model.response.OperationStatusModel;
+import com.easybidding.app.ws.ui.model.response.RequestOperationStatus;
 
 //@CrossOrigin("*")
 @RestController
@@ -37,7 +39,7 @@ public class StateController {
 		return stateService.getStatesByCountry(countryCode);
 	}
 
-	@PostMapping
+	@PostMapping("/state")
 	public StateDto save(@Valid @RequestBody StateDto request) throws ParseException {
 		return stateService.save(request);
 	}
@@ -52,4 +54,14 @@ public class StateController {
 		return "delete state was called";
 	}
 
+	@PostMapping
+	public OperationStatusModel batchSave(@Valid @RequestBody List<StateDto> request) {
+		OperationStatusModel response = new OperationStatusModel();
+		response.setOperationName(RequestOperationName.BATCHINSERT.name());
+
+		stateService.batchSave(request);
+
+		response.setOperationResult(RequestOperationStatus.SUCCESS.name());
+		return response;
+	}
 }

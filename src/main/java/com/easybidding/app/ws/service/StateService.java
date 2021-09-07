@@ -11,4 +11,6 @@ public interface StateService {
 	StateDto getState(String stateCode, String countryCode);
 
 	StateDto save(StateDto dto);
+
+	void batchSave(List<StateDto> dtos);
 }

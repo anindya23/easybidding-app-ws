@@ -14,8 +14,6 @@ public class StateDto {
 	private String stateName;
 	private CountryDto country;
 	private String status;
-//	private UserDto createdBy;
-//	private UserDto lastUpdatedBy;
 	private String dateCreated;
 	private String dateLastUpdated;
 	private List<CountyDto> counties;

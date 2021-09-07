@@ -86,6 +86,20 @@ public class StateServiceImpl implements StateService {
 		StateEntity savedEntity = stateRepository.save(convertDtoToEntity(dto, entity));
 		return convertEntityToDto(savedEntity);
 	}
+	
+	@Override
+	public void batchSave(List<StateDto> dtos) {
+		List<StateEntity> entities = new ArrayList<StateEntity>();
+
+		for (StateDto dto : dtos) {
+			if (dto.getId() != null)
+				entities.add(convertDtoToEntity(dto, stateRepository.getOne(dto.getId())));
+			else
+				entities.add(convertDtoToEntity(dto, null));
+		}
+
+		stateRepository.saveInBatch(entities);
+	}
 
 	/*
 	 * ============================== Service Util Methods =================================

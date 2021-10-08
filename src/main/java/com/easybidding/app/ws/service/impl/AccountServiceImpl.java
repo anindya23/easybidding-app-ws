@@ -118,7 +118,7 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public List<AccountDto> getAllAccounts() {
-		List<AccountEntity> entities = accountRepository.findAll();
+		List<AccountEntity> entities = accountRepository.findAllAccounts();
 
 		if (entities.isEmpty())
 			throw new RuntimeException("No Accounts Found");
@@ -237,14 +237,14 @@ public class AccountServiceImpl implements AccountService {
 	}
 
 	@Override
-	@Transactional
-	public void delete(String id) {
+	public void softDelete(String id) {
 		AccountEntity entity = accountRepository.getOne(id);
 
 		if (entity == null) {
 			throw new RuntimeException("No Account Found");
 		}
-		accountRepository.delete(entity);
+		entity.setStatus(Status.DELETED);
+		accountRepository.save(entity);
 	}
 
 	@Override

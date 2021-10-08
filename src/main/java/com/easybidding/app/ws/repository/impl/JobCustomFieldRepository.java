@@ -24,22 +24,22 @@ public interface JobCustomFieldRepository extends BaseRepository<JobCustomFieldE
 	Page<JobCustomFieldEntity> findFieldsByJobAndStatus(@Param("jobId") String jobId, @Param("status") Status status,
 			Pageable pageable);
 
-	@Query("SELECT jcf FROM JobCustomFieldEntity jcf WHERE jcf.id IN :ids")
+	@Query("SELECT jcf FROM JobCustomFieldEntity jcf WHERE jcf.id IN :ids AND jcf.status = 'ACTIVE'")
 	public List<JobCustomFieldEntity> findAllFieldsByIds(@Param("ids") List<String> ids);
 
-	@Query("SELECT jcf FROM JobCustomFieldEntity jcf WHERE jcf.id IN :ids")
+	@Query("SELECT jcf FROM JobCustomFieldEntity jcf WHERE jcf.id IN :ids AND jcf.status = 'ACTIVE'")
 	public Page<JobCustomFieldEntity> findFieldsByIds(@Param("ids") List<String> ids, Pageable pageable);
 
-	@Query("SELECT jcf FROM JobCustomFieldEntity jcf JOIN jcf.job j WHERE j.id = :jobId")
+	@Query("SELECT jcf FROM JobCustomFieldEntity jcf JOIN jcf.job j WHERE j.id = :jobId AND jcf.status = 'ACTIVE'")
 	public List<JobCustomFieldEntity> findAllFieldsByJob(@Param("jobId") String jobId);
 
-	@Query("SELECT jcf FROM JobCustomFieldEntity jcf JOIN jcf.job j WHERE j.id = :jobId")
+	@Query("SELECT jcf FROM JobCustomFieldEntity jcf JOIN jcf.job j WHERE j.id = :jobId AND jcf.status = 'ACTIVE'")
 	public Page<JobCustomFieldEntity> findFieldsByJob(@Param("jobId") String jobId, Pageable pageable);
 	
-	@Query("SELECT jcf FROM JobCustomFieldEntity jcf LEFT JOIN jcf.job j LEFT JOIN jcf.account a WHERE j.id = :jobId AND a.id = :accountId")
+	@Query("SELECT jcf FROM JobCustomFieldEntity jcf LEFT JOIN jcf.job j LEFT JOIN jcf.account a WHERE j.id = :jobId AND a.id = :accountId AND jcf.status = 'ACTIVE'")
 	List<JobCustomFieldEntity> findAllFieldsByJobAndAccount(@Param("jobId") String jobId, @Param("accountId") String accountId);
 	
-	@Query("SELECT jcf FROM JobCustomFieldEntity jcf LEFT JOIN jcf.account a WHERE a.id = :accountId")
+	@Query("SELECT jcf FROM JobCustomFieldEntity jcf LEFT JOIN jcf.account a WHERE a.id = :accountId AND jcf.status = 'ACTIVE'")
 	List<JobCustomFieldEntity> findAllFieldsByAccount(@Param("accountId") String accountId);
 
 }

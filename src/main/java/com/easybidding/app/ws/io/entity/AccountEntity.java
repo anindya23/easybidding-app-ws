@@ -110,10 +110,6 @@ public class AccountEntity extends BaseEntity implements Serializable {
 			CascadeType.MERGE }, fetch = FetchType.EAGER, orphanRemoval = true)
 	private List<JobFileEntity> files;
 
-	@OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@Fetch(value = FetchMode.SUBSELECT)
-	private List<JobCustomNoteEntity> customNotes;
-	
 	public String getAccountName() {
 		return accountName;
 	}
@@ -280,14 +276,6 @@ public class AccountEntity extends BaseEntity implements Serializable {
 
 	public void setFiles(List<JobFileEntity> files) {
 		this.files = files;
-	}
-
-	public List<JobCustomNoteEntity> getCustomNotes() {
-		return customNotes;
-	}
-
-	public void setCustomNotes(List<JobCustomNoteEntity> customNotes) {
-		this.customNotes = customNotes;
 	}
 
 }

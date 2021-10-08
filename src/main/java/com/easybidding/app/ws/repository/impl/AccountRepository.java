@@ -29,7 +29,7 @@ public interface AccountRepository extends BaseRepository<AccountEntity, String>
 
 	List<AccountEntity> findByCountry(CountryEntity country);
 
-	List<AccountEntity> findByAccountNameContainingIgnoreCase(String term);
+//	List<AccountEntity> findByAccountNameContainingIgnoreCase(String term);
 
 	Page<AccountEntity> findByStatus(Status status, Pageable pageable);
 
@@ -39,10 +39,16 @@ public interface AccountRepository extends BaseRepository<AccountEntity, String>
 
 	Page<AccountEntity> findByCountry(CountryEntity county, Pageable pageable);
 
-	@Query("SELECT a FROM AccountEntity a WHERE a.id IN :ids")
+	@Query("SELECT a FROM AccountEntity a WHERE lower(a.accountName) like lower(concat('%', :term,'%')) AND a.status = 'ACTIVE'")
+	List<AccountEntity> findByAccountNameContainingIgnoreCase(@Param("term") String term);
+	
+	@Query("SELECT a FROM AccountEntity a WHERE a.status != 'DELETED' ORDER BY a.accountName ASC")
+	public List<AccountEntity> findAllAccounts();
+	
+	@Query("SELECT a FROM AccountEntity a WHERE a.id IN :ids AND a.status = 'ACTIVE' ORDER BY a.accountName ASC")
 	public Set<AccountEntity> findAccountsByIds(@Param("ids") List<String> ids);
 
-	@Query("SELECT a FROM AccountEntity a WHERE a.id IN :ids")
+	@Query("SELECT a FROM AccountEntity a WHERE a.id IN :ids AND a.status = 'ACTIVE'")
 	public List<AccountEntity> findAccountsByIds(@Param("ids") List<String> ids, Pageable pageable);
 
 	void deleteByIdIn(List<String> ids);

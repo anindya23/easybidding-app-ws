@@ -39,7 +39,7 @@ public interface AccountService {
 
 	AccountDto save(AccountDto dto);
 
-	void delete(String id);
+	void softDelete(String id);
 
 	void batchDelete(List<String> ids);
 

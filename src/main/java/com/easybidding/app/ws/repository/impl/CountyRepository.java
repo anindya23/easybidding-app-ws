@@ -21,19 +21,19 @@ public interface CountyRepository extends BaseRepository<CountyEntity, String> {
 
 	Page<CountyEntity> findByStatus(Status status, Pageable pageable);
 
-	@Query("SELECT c FROM CountyEntity c JOIN c.country cn Join c.state s WHERE s.stateCode = :stateCode AND cn.countryCode = :countryCode")
+	@Query("SELECT c FROM CountyEntity c JOIN c.country cn Join c.state s WHERE s.stateCode = :stateCode AND cn.countryCode = :countryCode AND c.status = 'ACTIVE'")
 	public List<CountyEntity> findByStateAndCountry(@Param("stateCode") String stateCode,
 			@Param("countryCode") String countryCode);
 
 	@Query("SELECT c FROM CountyEntity c JOIN c.country cn Join c.state s WHERE "
-			+ "c.countyCode = :countyCode AND s.stateCode = :stateCode AND cn.countryCode = :countryCode")
+			+ "c.countyCode = :countyCode AND s.stateCode = :stateCode AND cn.countryCode = :countryCode AND c.status = 'ACTIVE'")
 	public CountyEntity findByCountyCode(@Param("countyCode") String countyCode, @Param("stateCode") String stateCode,
 			@Param("countryCode") String countryCode);
 
-	@Query("SELECT c FROM CountyEntity c WHERE c.id IN :ids")
+	@Query("SELECT c FROM CountyEntity c WHERE c.id IN :ids AND c.status = 'ACTIVE'")
 	public List<CountyEntity> findCountiesByIds(@Param("ids") List<String> ids);
 
-	@Query("SELECT c FROM CountyEntity c WHERE c.id IN :ids")
+	@Query("SELECT c FROM CountyEntity c WHERE c.id IN :ids AND c.status = 'ACTIVE'")
 	public Page<CountyEntity> findCountiesByIds(@Param("ids") List<String> ids, Pageable pageable);
 
 }

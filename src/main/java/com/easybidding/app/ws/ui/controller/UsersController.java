@@ -184,7 +184,7 @@ public class UsersController {
 		OperationStatusModel response = new OperationStatusModel();
 		response.setOperationName(RequestOperationName.DELETE.name());
 
-		userService.deleteUser(id);
+		userService.softDeleteUser(id);
 
 		response.setOperationResult(RequestOperationStatus.SUCCESS.name());
 		return response;

@@ -21,16 +21,16 @@ public interface StateRepository extends BaseRepository<StateEntity, String> {
 
 	Page<StateEntity> findByStatus(Status status, Pageable pageable);
 
-	@Query("SELECT s FROM StateEntity s JOIN s.country c WHERE c.countryCode = :countryCode")
+	@Query("SELECT s FROM StateEntity s JOIN s.country c WHERE c.countryCode = :countryCode AND s.status = 'ACTIVE' ORDER BY s.stateName ASC")
 	public List<StateEntity> findByCountry(@Param("countryCode") String countryCode);
 
-	@Query("SELECT s FROM StateEntity s JOIN s.country c WHERE s.stateCode = :stateCode AND c.countryCode = :countryCode")
+	@Query("SELECT s FROM StateEntity s JOIN s.country c WHERE s.stateCode = :stateCode AND c.countryCode = :countryCode AND s.status = 'ACTIVE'")
 	public StateEntity findByStateCode(@Param("stateCode") String stateCode, @Param("countryCode") String countryCode);
 
-	@Query("SELECT s FROM StateEntity s WHERE s.id IN :ids")
+	@Query("SELECT s FROM StateEntity s WHERE s.id IN :ids AND s.status = 'ACTIVE'")
 	public List<StateEntity> findStatesByIds(@Param("ids") List<String> ids);
 
-	@Query("SELECT s FROM StateEntity s WHERE s.id IN :ids")
+	@Query("SELECT s FROM StateEntity s WHERE s.id IN :ids AND s.status = 'ACTIVE'")
 	public Page<StateEntity> findStatesByIds(@Param("ids") List<String> ids, Pageable pageable);
 
 }

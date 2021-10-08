@@ -24,19 +24,19 @@ public interface JobFileRepository extends BaseRepository<JobFileEntity, String>
 	Page<JobFileEntity> findFilesByJobAndStatus(@Param("jobId") String jobId, @Param("status") Status status,
 			Pageable pageable);
 
-	@Query("SELECT jf FROM JobFileEntity jf WHERE jf.id IN :ids")
+	@Query("SELECT jf FROM JobFileEntity jf WHERE jf.id IN :ids AND jf.status = 'ACTIVE'")
 	public List<JobFileEntity> findAllFilesByIds(@Param("ids") List<String> ids);
 
-	@Query("SELECT jf FROM JobFileEntity jf WHERE jf.id IN :ids")
+	@Query("SELECT jf FROM JobFileEntity jf WHERE jf.id IN :ids AND jf.status = 'ACTIVE'")
 	public Page<JobFileEntity> findFilesByIds(@Param("ids") List<String> ids, Pageable pageable);
 
-	@Query("SELECT jf FROM JobFileEntity jf JOIN jf.job j WHERE j.id = :jobId")
+	@Query("SELECT jf FROM JobFileEntity jf JOIN jf.job j WHERE j.id = :jobId AND jf.status = 'ACTIVE'")
 	public List<JobFileEntity> findAllFilesByJob(@Param("jobId") String jobId);
 
-	@Query("SELECT jf FROM JobFileEntity jf JOIN jf.job j WHERE j.id = :jobId")
+	@Query("SELECT jf FROM JobFileEntity jf JOIN jf.job j WHERE j.id = :jobId AND jf.status = 'ACTIVE'")
 	public Page<JobFileEntity> findFilesByJob(@Param("jobId") String jobId, Pageable pageable);
 	
-	@Query("SELECT jf FROM JobFileEntity jf LEFT JOIN jf.job j LEFT JOIN jf.account a WHERE j.id = :jobId AND a.id = :accountId")
+	@Query("SELECT jf FROM JobFileEntity jf LEFT JOIN jf.job j LEFT JOIN jf.account a WHERE j.id = :jobId AND a.id = :accountId AND jf.status = 'ACTIVE'")
 	List<JobFileEntity> findAllFilesByJobAndAccount(@Param("jobId") String jobId, @Param("accountId") String accountId);
 
 }

@@ -21,14 +21,14 @@ public interface UserRepository extends BaseRepository<UserEntity, String> {
 
 //	UserEntity findByAccountId(String accountId);
 
-	@Query("SELECT u FROM UserEntity u JOIN u.account a WHERE a.id = :accountId")
+	@Query("SELECT u FROM UserEntity u JOIN u.account a WHERE a.id = :accountId AND u.status = 'ACTIVE'")
 	public List<UserEntity> findAllUsersByAccount(@Param("accountId") String accountId);
 
 	@Query("SELECT u FROM UserEntity u JOIN u.account a WHERE a.id = :accountId AND u.status = :status")
 	public List<UserEntity> findAllUsersByAccountAndStatus(@Param("accountId") String accountId,
 			@Param("status") Status status);
 
-	@Query("SELECT u FROM UserEntity u JOIN u.account a WHERE a.id = :accountId")
+	@Query("SELECT u FROM UserEntity u JOIN u.account a WHERE a.id = :accountId AND u.status = 'ACTIVE'")
 	public Page<UserEntity> findUsersByAccount(@Param("accountId") String accountId, Pageable pageable);
 
 	@Query("SELECT u FROM UserEntity u JOIN u.account a WHERE a.id = :accountId AND u.status = :status")

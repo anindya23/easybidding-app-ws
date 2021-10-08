@@ -38,7 +38,7 @@ public interface UserService extends UserDetailsService {
 
 	UserDto save(UserDto dto);
 
-	void deleteUser(String id);
+	void softDeleteUser(String id);
 	
 	void removeToken(String token);
 

@@ -33,7 +33,7 @@ public interface JobRepository extends BaseRepository<JobEntity, String> {
 //	public Page<JobEntity> findJobsByAccountAndStatus(@Param("accountId") String accountId,
 //			@Param("status") Status status, Pageable pageable);
 
-	@Query("SELECT j FROM JobEntity j WHERE j.id IN :ids")
+	@Query("SELECT j FROM JobEntity j WHERE j.id IN :ids AND j.status = 'ACTIVE'")
 	public Set<JobEntity> findJobsByIds(@Param("ids") List<String> ids);
 
 }

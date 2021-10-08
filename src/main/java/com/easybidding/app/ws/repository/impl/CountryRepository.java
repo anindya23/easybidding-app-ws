@@ -19,10 +19,10 @@ public interface CountryRepository extends BaseRepository<CountryEntity, String>
 
 	Page<CountryEntity> findByStatus(Status status, Pageable pageable);
 
-	@Query("SELECT a FROM CountryEntity a WHERE a.id IN :ids")
+	@Query("SELECT a FROM CountryEntity a WHERE a.id IN :ids AND a.status = 'ACTIVE'")
 	public List<CountryEntity> findCountriesByIds(@Param("ids") List<String> ids);
 
-	@Query("SELECT a FROM CountryEntity a WHERE a.id IN :ids")
+	@Query("SELECT a FROM CountryEntity a WHERE a.id IN :ids AND a.status = 'ACTIVE'")
 	public Page<CountryEntity> findCountriesByIds(@Param("ids") List<String> ids, Pageable pageable);
 
 	void deleteByIdIn(List<String> ids);

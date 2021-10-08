@@ -242,14 +242,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	@Transactional
-	public void deleteUser(String id) {
+	public void softDeleteUser(String id) {
 		UserEntity entity = userRepository.getOne(id);
 
 		if (entity == null)
 			throw new RuntimeException("No User found");
-
-		userRepository.delete(entity);
+		
+		entity.setStatus(Status.DELETED);
+		userRepository.save(entity);
 	}
 
 	@Override

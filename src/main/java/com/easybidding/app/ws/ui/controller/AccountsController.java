@@ -190,7 +190,7 @@ public class AccountsController {
 		OperationStatusModel response = new OperationStatusModel();
 		response.setOperationName(RequestOperationName.DELETE.name());
 
-		accountService.delete(id);
+		accountService.softDelete(id);
 
 		response.setOperationResult(RequestOperationStatus.SUCCESS.name());
 		return response;

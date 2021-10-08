@@ -192,11 +192,11 @@ public class JobServiceImpl implements JobService {
 		if (entity == null)
 			throw new RuntimeException("No Record found");
 
-		String key = "jobs/" + entity.getJob().getId() + "/" + entity.getAccount().getId();
-		
-		if (amazonS3.doesObjectExist(bucket, key)) {
-			deleteDirectory(key);	
-		}
+//		String key = "jobs/" + entity.getJob().getId() + "/" + entity.getAccount().getId();
+//		
+//		if (amazonS3.doesObjectExist(bucket, key)) {
+//			deleteDirectory(key);	
+//		}
 
 		JobEntity job = jobRepository.getOne(entity.getJob().getId());
 		AccountEntity account = accountRepository.getOne(entity.getAccount().getId());
@@ -213,15 +213,19 @@ public class JobServiceImpl implements JobService {
 	@Transactional
 	public JobDto save(JobDto dto) {
 		JobEntity entity = null;
+		JobEntity savedEntity = null;
 
 		if (dto.getId() != null) {
 			entity = jobRepository.getOne(dto.getId());
 
 			if (entity == null)
 				throw new RuntimeException("No Job found with ID: " + dto.getId());
+			
+			savedEntity = jobRepository.save(convertDtoToEntity(dto, entity));
+		} else {
+			savedEntity = jobRepository.save(convertDtoToEntity(dto, entity));
+//			savedEntity = jobRepository.save(convertDtoToEntity(dto, savedEntity));
 		}
-
-		JobEntity savedEntity = jobRepository.save(convertDtoToEntity(dto, entity));
 		return convertEntityToDto(savedEntity);
 	}
 
@@ -273,12 +277,9 @@ public class JobServiceImpl implements JobService {
 	 * Layer.
 	 */
 	private JobEntity convertDtoToEntity(JobDto dto, JobEntity entity) {
-		if (dto.getId() == null) {
+		if (entity == null) {
 			entity = this.mapper.map(dto, JobEntity.class);
 			entity.setId(utils.generateUniqueId(30));
-		} else {
-			entity = jobRepository.getOne(dto.getId());
-			this.mapper.map(dto, entity);
 		}
 
 		if (dto.getAccounts() != null && !dto.getAccounts().isEmpty()) {
@@ -327,6 +328,12 @@ public class JobServiceImpl implements JobService {
 			entity.setFiles(files);
 		}
 
+		if (dto.getCustomNotes() == null && entity.getCustomNotes() != null) {
+			List<JobCustomNoteEntity> notes = new ArrayList<JobCustomNoteEntity>();
+			entity.getCustomNotes().clear();
+			entity.getCustomNotes().addAll(notes);
+		}
+		
 		if (dto.getCustomNotes() != null && !dto.getCustomNotes().isEmpty()) {
 			List<JobCustomNoteEntity> notes = new ArrayList<JobCustomNoteEntity>();
 
@@ -335,15 +342,20 @@ public class JobServiceImpl implements JobService {
 					JobCustomNoteEntity noteEntity = new JobCustomNoteEntity();
 					noteEntity.setId(utils.generateUniqueId(30));
 					noteEntity.setNote(noteDto.getNote());
-					noteEntity.setAccount(accountRepository.getOne(noteDto.getAccount().getId()));
-					noteEntity.setJob(jobRepository.getOne(noteDto.getJob().getId()));
+					
+					if (noteDto.getAccount() != null) {
+						noteEntity.setAccount(accountRepository.getOne(noteDto.getAccount().getId()));	
+					}
+					
+//					noteEntity.setJob(jobRepository.getOne(noteDto.getJob().getId()));
+					noteEntity.setJob(entity);
 					notes.add(noteEntity);
 				} else {
 					for (JobCustomNoteEntity noteEntity : entity.getCustomNotes()) {
-						if (noteDto.getAccount().getId().equals(noteEntity.getAccount().getId())) {
+						if (noteDto.getId().equals(noteEntity.getId())) {
 							noteEntity.setNote(noteDto.getNote());
+							notes.add(noteEntity);
 						}
-						notes.add(noteEntity);
 					}
 				}
 			}
@@ -356,6 +368,12 @@ public class JobServiceImpl implements JobService {
 			}
 		}
 
+		if (dto.getFields() == null && entity.getFields() != null) {
+			List<JobCustomFieldEntity> fields = new ArrayList<JobCustomFieldEntity>();
+			entity.getFields().clear();
+			entity.getFields().addAll(fields);
+		}
+		
 		if (dto.getFields() != null && !dto.getFields().isEmpty()) {
 			List<JobCustomFieldEntity> fields = new ArrayList<JobCustomFieldEntity>();
 
@@ -363,18 +381,22 @@ public class JobServiceImpl implements JobService {
 				if (fieldDto.getId() == null) {
 					JobCustomFieldEntity fieldEntity = new JobCustomFieldEntity();
 					fieldEntity.setId(utils.generateUniqueId(30));
-					fieldEntity.setAccount(accountRepository.getOne(fieldDto.getAccount().getId()));
+					
+					if (fieldDto.getAccount() != null) {
+						fieldEntity.setAccount(accountRepository.getOne(fieldDto.getAccount().getId()));						
+					}
+
 					fieldEntity.setJob(entity);
 					fieldEntity.setFieldName(fieldDto.getFieldName());
 					fieldEntity.setFieldValue(fieldDto.getFieldValue());
 					fields.add(fieldEntity);
 				} else {
 					for (JobCustomFieldEntity fieldEntity : entity.getFields()) {
-						if (fieldEntity.getAccount().getId().equals(fieldDto.getAccount().getId())) {
+						if (fieldEntity.getId().equals(fieldDto.getId())) {
 							fieldEntity.setFieldName(fieldDto.getFieldName());
 							fieldEntity.setFieldValue(fieldDto.getFieldValue());
+							fields.add(fieldEntity);
 						}
-						fields.add(fieldEntity);
 					}
 				}
 			}
@@ -386,7 +408,7 @@ public class JobServiceImpl implements JobService {
 				entity.getFields().addAll(fields);
 			}
 		}
-
+		
 		if (dto.getCountry() != null) {
 			entity.setCountry(countryRepository.findByCountryCode(dto.getCountry().getCountryCode()));
 		}
